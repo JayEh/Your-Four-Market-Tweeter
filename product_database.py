@@ -7,3 +7,5 @@ Created on Fri Oct  9 12:31:38 2020
 
 # use sqlite to collect market data
 
+import sqlite3
+
