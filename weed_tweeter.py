@@ -5,6 +5,7 @@ Created on Thu Oct  1 12:53:41 2020
 @author: Jarrett
 """
 
+from datetime import datetime
 import subprocess
 import json
 import pandas as pd
@@ -67,7 +68,10 @@ def get_price_as_float(price_text):
 # add the parsed thc and cbd data to the product, as its original as a string
 # other data cleaning
 def update_products(products):
+    current_time = str(datetime.utcnow())
+    
     for product in products:
+        product['date'] = current_time
         thc_data = get_min_max_as_percent(product['Thc'])
         product['thc_min'] = thc_data['min']
         product['thc_max'] = thc_data['max']
@@ -171,12 +175,10 @@ largeformat_desc = largeformat_df.describe()
 
 # graphs!  generate some graphs
 
+
 # histogram of average dollars per gram by product weight
 
 
-
-
-
-
-
 # other cool things
+
+
