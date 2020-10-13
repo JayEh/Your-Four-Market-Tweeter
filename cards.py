@@ -5,6 +5,8 @@ Created on Sat Oct 10 14:17:18 2020
 @author: jarre
 """
 
+import matplotlib.pyplot as plt
+
 
 # inherit this class
 class TweetCard():
@@ -51,8 +53,30 @@ class HighThcCompanies(TweetCard):
         
         return list(zip(top_brands, top_thc))
     
-    def getImage(self):
-        pass
+    def getImage(self, data):
+        fig, ax = plt.subplots()
+
+        # sample code from online, adapt it!
+        # Example data
+        companies = [d[0] for d in data]
+        
+        y_pos = np.arange(len(companies))
+        
+        performance = 3 + 10 * np.random.rand(len(people))
+        
+        
+        ax.barh(y_pos, performance, align='center')
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(companies)
+        
+        ax.invert_yaxis()  # labels read top-to-bottom
+        ax.set_xlabel('Brands')
+        ax.set_title('Brands with highest average THC content.')
+        
+        plt.show()
+        
+        # save the figure
+        # return it?
 
 
 
@@ -73,8 +97,17 @@ class HighValueCompanies(TweetCard):
 
 
 
-data = HighThcProducts(products, products_df).getData()
+data1 = HighThcProducts(products, products_df).getData()
 
-data = HighThcCompanies(products, products_df).getData()
 
-data = HighValueCompanies(products, products_df).getData()
+htc = HighThcCompanies(products, products_df)
+htc_data = htc.getData()
+htc_img = htc.getImage(htc_data)
+
+
+data3 = HighValueCompanies(products, products_df).getData()
+
+
+
+
+
