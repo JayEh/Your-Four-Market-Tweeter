@@ -69,3 +69,6 @@ def saveProductsToDb(products):
     return inserted_ids
 
 
+# inserted_ids = saveProductsToDb(products)
+
+
