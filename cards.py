@@ -6,6 +6,7 @@ Created on Sat Oct 10 14:17:18 2020
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 # inherit this class
@@ -23,21 +24,56 @@ class HighThcProducts(TweetCard):
     """
     
     def getData(self):
-        min_thc_sorted = sorted(self.products, key=lambda p: p['thc_avg'], reverse=True)
-        products_to_report = 10
-        counter = 0
-        companies = set()
+        # this one is a little different... lots of people will be at like 28% and 
+        # to be fair we should randomly select from that pool so everyone gets a chance
         
-        while len(companies) < products_to_report and counter < len(self.products):
-            product = min_thc_sorted[counter]
-            companies.add((product['Brand'], product['DisplayName'], product['thc_avg']))
-            counter += 1
+        highest_thc = self.products_df.groupby(['Brand','DisplayName']).mean()
+        highest_thc = highest_thc.sort_values(by=['thc_max'], ascending=False)
         
-        companies = sorted(list(companies), key=lambda p:p[2], reverse=True)
-        return companies
+        top_thc = list(highest_thc['thc_max'][:10].values)
+        
+        min_val = min(top_thc)
+        
+        # take from highest THC where greater than min val, want those all the time
+        report_rows = highest_thc[highest_thc['thc_max'] > min_val]
+        
+        # then filter highest_thc on the min_val, and fill in the remaining slots from here
+        min_rows = highest_thc[highest_thc['thc_max'] == min_val]
+        min_rows_prob = np.full(len(min_rows), 1/len(min_rows))
+        
+        
+        
+        # this is a little off but the general idea.  min_rows is not a 1D array
+        additional_rows = np.random.choice(min_rows, p=min_rows_prob, size=10-len(report_rows))
+        
+        
+        
+        
+        report_rows = report_rows + additional_rows
+        
+        # do this once all the products are selected in the special way
+        # top_brands = list(report_rows.index)
+        # top_thc = list(report_rows['thc_max'].values)
+        
+        return list(zip(top_brands, top_thc))
     
-    def getImage(self):
-        pass
+    def getImage(self, data):
+        fig, ax = plt.subplots()
+
+        companies = [d[0] for d in data] # y axis
+        avg_thc = [d[1] for d in data]   # x axis
+        
+        y_pos = np.arange(len(companies))
+        
+        ax.barh(y_pos, avg_thc, align='center')
+        ax.set_ylabel('Brand')
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(companies)        
+        ax.invert_yaxis()  # sort desc
+        
+        ax.set_xticks([])
+        ax.set_title('AGLC - Highest Average THC Content')
+        plt.show()
 
 
 
@@ -56,23 +92,19 @@ class HighThcCompanies(TweetCard):
     def getImage(self, data):
         fig, ax = plt.subplots()
 
-        # sample code from online, adapt it!
-        # Example data
-        companies = [d[0] for d in data]
+        companies = [d[0] for d in data] # y axis
+        avg_thc = [d[1] for d in data]   # x axis
         
         y_pos = np.arange(len(companies))
         
-        performance = 3 + 10 * np.random.rand(len(people))
-        
-        
-        ax.barh(y_pos, performance, align='center')
+        ax.barh(y_pos, avg_thc, align='center')
+        ax.set_ylabel('Brand')
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(companies)
+        ax.set_yticklabels(companies)        
+        ax.invert_yaxis()  # sort desc
         
-        ax.invert_yaxis()  # labels read top-to-bottom
-        ax.set_xlabel('Brands')
-        ax.set_title('Brands with highest average THC content.')
-        
+        ax.set_xticks([])
+        ax.set_title('AGLC - Highest Average THC Content')
         plt.show()
         
         # save the figure
@@ -91,9 +123,26 @@ class HighValueCompanies(TweetCard):
         
         return list(zip(top_brands, top_dpg))
     
-    def getImage(self):
-        pass
+    def getImage(self, data):
+        fig, ax = plt.subplots()
+        
+        top_brands = [d[0] for d in data]
+        dpg = [d[1] for d in data]
 
+        y_pos = np.arange(len(top_brands))
+        
+        ax.barh(y_pos, dpg, align='center')
+        ax.set_ylabel('Brand')
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(top_brands)        
+        ax.invert_yaxis()  # sort desc
+        
+        ax.set_xticks([])
+        ax.set_title('AGLC - Lowest Average Dollar Per Gram')
+        plt.show()
+        
+        # save the figure
+        # return it?
 
 
 
@@ -105,8 +154,9 @@ htc_data = htc.getData()
 htc_img = htc.getImage(htc_data)
 
 
-data3 = HighValueCompanies(products, products_df).getData()
-
+hvc = HighValueCompanies(products, products_df)
+hvc_data = hvc.getData()
+hvc_img = hvc.getImage(hvc_data)
 
 
 
