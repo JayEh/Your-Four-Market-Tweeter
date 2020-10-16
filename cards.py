@@ -137,7 +137,10 @@ class HighValueCompanies(TweetCard):
         ax.set_yticklabels(top_brands)        
         ax.invert_yaxis()  # sort desc
         
-        ax.set_xticks([])
+        # need to get the $ amounts drawn onto this chart!
+        
+        
+        ax.xaxis.set_visible(False)
         ax.set_title('AGLC - Lowest Average Dollar Per Gram')
         plt.show()
         
