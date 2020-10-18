@@ -69,6 +69,13 @@ def saveProductsToDb(products):
     return inserted_ids
 
 
-# inserted_ids = saveProductsToDb(products)
+def saveTweetToHistory(tweet_response_json):
+    insert_sql = 'INSERT INTO tweet_history (response_json) VALUES (?)'
+    col_params = [tweet_response_json]
+    inserted_id = hacky_run_sql(insert_sql, col_params)
+    return inserted_id
+
+
+inserted_ids = saveProductsToDb(products)
 
 
