@@ -58,7 +58,7 @@ class HighThcCompanies(TweetCard):
         ax.invert_yaxis()  # sort desc
         
         ax.set_xticks([])
-        ax.set_xlabel('the date')
+        ax.set_xlabel('Data collected from AlbertaCannabis.org on {the date}')
         
         plt.show()
         
@@ -117,37 +117,42 @@ class HighValueProducts(TweetCard):
 
 class HighThcProducts(TweetCard):
     """
-    Which companies have the highest THC products (the highest average), and what are those products?
+    Which companies have the highest THC products, and what are those products?
     """
     
     def getData(self):
-        # this one is a little different... lots of people will be at like 28% and 
+        # this one is a little different... lots of people will be at like 27-28% and 
         # to be fair we should randomly select from that pool so everyone gets a chance
         
+        rows = 10
+        
         highest_thc = self.products_df.groupby(['Brand','DisplayName']).mean()
-        highest_thc = highest_thc.sort_values(by=['thc_max'], ascending=False)
+        highest_thc = highest_thc.sort_values(by=['thc_max', 'thc_min'], ascending=False)
         
-        top_thc = list(highest_thc['thc_max'][:10].values)
-        
-        min_val = min(top_thc)
+        # these rows could be in the report. what is the lowest thc in the list?
+        min_val = highest_thc['thc_max'][:rows].min()
         
         # take from highest THC where greater than min val, want those all the time
-        report_rows = highest_thc[highest_thc['thc_max'] > min_val]
+        # this could conceivably return 0 if all top rows have the same max
+        report_rows = highest_thc[highest_thc['thc_max'] > min_val][:rows]
         
-        # then filter highest_thc on the min_val, and fill in the remaining slots from here
-        min_rows = highest_thc[highest_thc['thc_max'] == min_val]
+        # filter highest_thc on the min_val, use these to fill in the available report rows
+        min_rows = highest_thc[highest_thc['thc_max'] == min_val][:rows]
+        min_rows_idx = np.arange(len(min_rows))
         min_rows_prob = np.full(len(min_rows), 1/len(min_rows))
         
+        # make a random selection from the available rows
+        additional_rows_idxs = np.random.choice(min_rows_idx, p=min_rows_prob, size=rows-len(report_rows))
         
-        # this is a little off but the general idea.  min_rows is not a 1D array
-        additional_rows = np.random.choice(min_rows, p=min_rows_prob, size=10-len(report_rows))
+        # add the additional rows based on the random indexes in additional_rows_idx
+        for idx in additional_rows_idxs:
+            report_rows = report_rows.append(min_rows[idx:idx+1:])
         
-        
-        report_rows = report_rows + additional_rows
+        report_rows = report_rows.sort_values(by=['thc_max', 'thc_min'], ascending=False)
         
         # do this once all the products are selected in the special way
-        # top_brands = list(report_rows.index)
-        # top_thc = list(report_rows['thc_max'].values)
+        top_brands = list(report_rows.index)
+        top_thc = list((report_rows['thc_max']).values)
         
         return list(zip(top_brands, top_thc))
     
@@ -172,17 +177,17 @@ class HighThcProducts(TweetCard):
 
 
 
-data1 = HighThcProducts(products, products_df).getData()
+# data1 = HighThcProducts(products, products_df).getData()
 
 
-hvc = HighValueCompanies(products, products_df)
-hvc_data = hvc.getData()
-hvc_img = hvc.getImage(hvc_data)
+# hvc = HighValueCompanies(products, products_df)
+# hvc_data = hvc.getData()
+# hvc_img = hvc.getImage(hvc_data)
 
 
-htc = HighThcCompanies(products, products_df)
-htc_data = htc.getData()
-htc_img = htc.getImage(htc_data)
+# htc = HighThcCompanies(products, products_df)
+# htc_data = htc.getData()
+# htc_img = htc.getImage(htc_data)
 
 
 
