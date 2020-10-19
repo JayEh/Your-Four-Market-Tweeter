@@ -8,7 +8,9 @@ Created on Sat Oct 10 14:17:18 2020
 import matplotlib.pyplot as plt
 import numpy as np
 import locale
+import pandas as pd
 locale.setlocale(locale.LC_ALL, 'en_CA.UTF-8')
+plt.style.use('ggplot')
 
 
 # inherit this class
@@ -89,10 +91,9 @@ class HighValueCompanies(TweetCard):
         ax.barh(y_pos, dpg, align='center')
         ax.set_ylabel('Brand')
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(top_brands)        
+        ax.set_yticklabels(top_brands)
         ax.invert_yaxis()  # sort desc
         
-        # need to get the $ amounts drawn onto this chart!
         for i,d in enumerate(data):
             formatted_amount = locale.currency(d[1]) + ' / gram'
             ax.text(0.25, i, formatted_amount, verticalalignment='center', color='white')
@@ -120,7 +121,7 @@ class HighThcProducts(TweetCard):
     Which companies have the highest THC products, and what are those products?
     """
     
-    def getData(self):
+    def getData_old(self):
         # this one is a little different... lots of people will be at like 27-28% and 
         # to be fair we should randomly select from that pool so everyone gets a chance
         
@@ -153,16 +154,54 @@ class HighThcProducts(TweetCard):
         # do this once all the products are selected in the special way
         top_brands = list(report_rows.index)
         top_thc = list((report_rows['thc_max']).values)
-        
         return list(zip(top_brands, top_thc))
+    
+    
+    def getData(self):
+        rows = 15
+        
+        # calculate the mean + 1std for thc_max, select out those rows
+        df_mean = self.products_df['thc_max'].mean()
+        df_std = self.products_df['thc_max'].std()
+        
+        report_rows = self.products_df[self.products_df['thc_max'] >= df_mean + df_std]
+        report_rows = report_rows.reset_index()
+        row_idxs = np.arange(len(report_rows))
+        row_probs = np.full(len(report_rows), 1/len(report_rows))
+        
+        # select however many to put in the report (randomly)
+        additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows).tolist()
+        
+        # something like this should work...? just select out the rows that were randomly selected
+        report_rows = report_rows.iloc[additional_rows_idxs]
+        
+        filtered_report_rows = report_rows.iloc[additional_rows_idxs]
+        
+        
+        
+        # also calculate the market mean and add it as a comparison point
+        
+        
+        
+        
+        top_brands = list(filtered_report_rows.index)
+        top_thc = list((filtered_report_rows['thc_max']).values)
+        return list(zip(top_brands, top_thc))
+    
     
     def getImage(self, data):
         fig, ax = plt.subplots()
 
-        companies = [d[0] for d in data] # y axis
+        
+        companies_and_products = [d[0] for d in data] # y axis
         avg_thc = [d[1] for d in data]   # x axis
         
-        y_pos = np.arange(len(companies))
+        companies = [c[0] for c in companies_and_products]
+        products = [c[1] for c in companies_and_products]
+        y_pos = np.arange(len(companies_and_products))
+        
+        for i,product_name in enumerate(products):
+            ax.text(0.5, i, product_name, verticalalignment='center', color='white')
         
         ax.barh(y_pos, avg_thc, align='center')
         ax.set_ylabel('Brand')
@@ -171,7 +210,7 @@ class HighThcProducts(TweetCard):
         ax.invert_yaxis()  # sort desc
         
         ax.set_xticks([])
-        ax.set_title('AGLC - Highest Average THC Content')
+        ax.set_title('High Average THC Content')
         plt.show()
 
 
