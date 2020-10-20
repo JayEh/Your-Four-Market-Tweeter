@@ -151,10 +151,19 @@ class HighThcProducts(TweetCard):
         
         report_rows = report_rows.sort_values(by=['thc_max', 'thc_min'], ascending=False)
         
+        
+        quantities = []
+        for brand, product in report_rows.index:
+            pdf = self.products_df
+            filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
+            jar_sizes = filtered_df['Quantity'].tolist()
+            quantities.append(jar_sizes)
+        
+        
         # do this once all the products are selected in the special way
         top_brands = list(report_rows.index)
         top_thc = list((report_rows['thc_max']).values)
-        return list(zip(top_brands, top_thc))
+        return list(zip(top_brands, top_thc, quantities))
     
     
     def getData(self):
@@ -175,18 +184,20 @@ class HighThcProducts(TweetCard):
         # something like this should work...? just select out the rows that were randomly selected
         report_rows = report_rows.iloc[additional_rows_idxs]
         
-        filtered_report_rows = report_rows.iloc[additional_rows_idxs]
-        
-        
-        
         # also calculate the market mean and add it as a comparison point
         
         
+        quantities = []
+        for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].list()):
+            pdf = self.products_df
+            filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
+            jar_sizes = filtered_df['Quantity'].tolist()
+            quantities.append(jar_sizes)
         
         
-        top_brands = list(filtered_report_rows.index)
-        top_thc = list((filtered_report_rows['thc_max']).values)
-        return list(zip(top_brands, top_thc))
+        top_brands = list(report_rows.index)
+        top_thc = list((report_rows['thc_max']).values)
+        return list(zip(top_brands, top_thc, quantities))
     
     
     def getImage(self, data):

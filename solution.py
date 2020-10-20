@@ -18,3 +18,4 @@ products, products_df = scraper.getProductDataFromWeb()
 highThcProductsCard = cards.HighThcProducts(products, products_df)
 data = highThcProductsCard.getData()
 highThcProductsCard.getImage(data)
+
