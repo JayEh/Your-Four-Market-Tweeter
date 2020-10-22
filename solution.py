@@ -15,7 +15,7 @@ products, products_df = scraper.getProductDataFromWeb()
 # data1 = HighThcProducts(products, products_df).getData()
 
 
-highThcProductsCard = cards.HighThcProducts(products, products_df, rows=20)
+highThcProductsCard = cards.HighThcProducts(products, products_df, rows=15)
 data = highThcProductsCard.getData()
 highThcProductsCard.getImage(data)
 

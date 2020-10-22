@@ -209,7 +209,7 @@ class HighThcProducts(TweetCard):
     
     
     def getImage(self, data):
-        fig, ax = plt.subplots(figsize=(5,8))
+        fig, ax = plt.subplots(figsize=(6,10))
         
         companies_and_products = [d[0] for d in data]
         avg_thc = [d[1] for d in data]
@@ -229,12 +229,14 @@ class HighThcProducts(TweetCard):
             
             ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
         
-        bar_colors = [(0.5+(i/(len(data) *3)),0,0) for i in range(len(data))]
+        bar_colors = [(0.35+(i/(len(data) *3)),0,0) for i in range(len(data))]
         bar_colors[len(bar_colors)-1] = (0.0,0,0)
         ax.barh(y_pos, avg_thc, align='center', color=bar_colors)
         ax.set_ylabel('Brand')
         ax.set_yticks(y_pos)
         ax.set_yticklabels(companies)
+        
+        # how do I set the font to make it easier to read?
         
         formatted_date = date.today().strftime('%B %d, %Y')
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
@@ -243,13 +245,14 @@ class HighThcProducts(TweetCard):
         ax.set_title('Above Average THC % (and available quantities)')
         plt.show()
         
+        
     def getTweetText(self):
         # can use the df data here to help make the text that goes with
         # the image! 
         
         tweet_text = (
             f'Here are {self.rows} of the highest THC strains on the market. '
-            f'Check back daily for a different {self.rows}!'
+            f'Check back daily for a different {self.rows}.'
             )
         
         return tweet_text
