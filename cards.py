@@ -17,10 +17,11 @@ plt.style.use('ggplot')
 
 # inherit this class
 class TweetCard():
-    def __init__(self, products, products_df, rows):
+    def __init__(self, products, products_df, rows, figsize):
         self.products = products
         self.products_df = products_df
         self.rows = rows
+        self.figsize = figsize
 
 
 class GovernmentURLs(TweetCard):
@@ -118,56 +119,10 @@ class HighValueProducts(TweetCard):
         pass
 
 
-
 class HighThcProducts(TweetCard):
     """
     Which companies have the highest THC products, and what are those products?
     """
-    
-    def getData_old(self):
-        # this one is a little different... lots of people will be at like 27-28% and 
-        # to be fair we should randomly select from that pool so everyone gets a chance
-        
-        rows = 10
-        
-        highest_thc = self.products_df.groupby(['Brand','DisplayName']).mean()
-        highest_thc = highest_thc.sort_values(by=['thc_max', 'thc_min'], ascending=False)
-        
-        # these rows could be in the report. what is the lowest thc in the list?
-        min_val = highest_thc['thc_max'][:rows].min()
-        
-        # take from highest THC where greater than min val, want those all the time
-        # this could conceivably return 0 if all top rows have the same max
-        report_rows = highest_thc[highest_thc['thc_max'] > min_val][:rows]
-        
-        # filter highest_thc on the min_val, use these to fill in the available report rows
-        min_rows = highest_thc[highest_thc['thc_max'] == min_val][:rows]
-        min_rows_idx = np.arange(len(min_rows))
-        min_rows_prob = np.full(len(min_rows), 1/len(min_rows))
-        
-        # make a random selection from the available rows
-        additional_rows_idxs = np.random.choice(min_rows_idx, p=min_rows_prob, size=rows-len(report_rows))
-        
-        # add the additional rows based on the random indexes in additional_rows_idx
-        for idx in additional_rows_idxs:
-            report_rows = report_rows.append(min_rows[idx:idx+1:])
-        
-        report_rows = report_rows.sort_values(by=['thc_max', 'thc_min'], ascending=False)
-        
-        
-        quantities = []
-        for brand, product in report_rows.index:
-            pdf = self.products_df
-            filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
-            jar_sizes = filtered_df['Quantity'].tolist()
-            quantities.append(jar_sizes)
-        
-        
-        # do this once all the products are selected in the special way
-        top_brands = list(report_rows.index)
-        top_thc = list((report_rows['thc_max']).values)
-        return list(zip(top_brands, top_thc, quantities))
-    
     
     def getData(self):
         rows = self.rows
@@ -209,7 +164,7 @@ class HighThcProducts(TweetCard):
     
     
     def getImage(self, data):
-        fig, ax = plt.subplots(figsize=(6,10))
+        fig, ax = plt.subplots(figsize=self.figsize)
         
         companies_and_products = [d[0] for d in data]
         avg_thc = [d[1] for d in data]
@@ -259,18 +214,51 @@ class HighThcProducts(TweetCard):
 
 
 
+class HighCbdProducts(TweetCard):
+    def getData(self):        
+        rows = self.rows
+        
+        # if there's not 1% cbd... exclude
+        df = self.products_df[self.products_df['cbd_min'] > 1.0]
+        
+        report_rows = df.groupby(['Brand','DisplayName']).mean()
+        report_rows = report_rows.reset_index()
+        
+        # try to take the max, but go with less if needed
+        report_row_len = min(len(report_rows), rows)
+        row_idxs = np.arange(report_row_len)
+        row_probs = np.full(report_row_len, 1/report_row_len)
+        
+        # select however many to put in the report (randomly)
+        additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
+        
+        # select the additional rows by index
+        report_rows = report_rows.iloc[additional_rows_idxs]
+        
+        # what quantities can you buy this in?      
+        quantities = []
+        for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
+            pdf = self.products_df
+            filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
+            jar_sizes = filtered_df['Quantity'].tolist()
+            quantities.append(jar_sizes)
+        
+        # bring the data together
+        top_brands = list(zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()))
+        top_cbd = list((report_rows['cbd_avg']).values)
+        
+        
+        data =  list(zip(top_brands, top_cbd, quantities))
+        
+        data = sorted(data, key=lambda x: x[1])
+        return data
+    
+    def getImage(self, data):
+        pass
 
-# data1 = HighThcProducts(products, products_df).getData()
+    def getTweetText(self):
+        pass
 
-
-# hvc = HighValueCompanies(products, products_df)
-# hvc_data = hvc.getData()
-# hvc_img = hvc.getImage(hvc_data)
-
-
-# htc = HighThcCompanies(products, products_df)
-# htc_data = htc.getData()
-# htc_img = htc.getImage(htc_data)
 
 
 

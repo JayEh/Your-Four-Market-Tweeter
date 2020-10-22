@@ -12,12 +12,19 @@ scraper = WebScraper()
 products, products_df = scraper.getProductDataFromWeb()
 
 
-# data1 = HighThcProducts(products, products_df).getData()
 
-
-highThcProductsCard = cards.HighThcProducts(products, products_df, rows=15)
+highThcProductsCard = cards.HighThcProducts(products, products_df, rows=15, figsize=(6,10))
 data = highThcProductsCard.getData()
 highThcProductsCard.getImage(data)
-
 text = highThcProductsCard.getTweetText()
 print(text)
+
+
+highCbdProductsCard = cards.HighCbdProducts(products, products_df, rows=5, figsize=(6,10))
+data = highCbdProductsCard.getData()
+highCbdProductsCard.getImage(data)
+text = highCbdProductsCard.getTweetText()
+print(text)
+
+
+
