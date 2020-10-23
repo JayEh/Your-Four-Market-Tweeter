@@ -20,7 +20,7 @@ text = highThcProductsCard.getTweetText()
 print(text)
 
 
-highCbdProductsCard = cards.HighCbdProducts(products, products_df, rows=5, figsize=(6,10))
+highCbdProductsCard = cards.HighCbdProducts(products, products_df, rows=15, figsize=(6,10))
 data = highCbdProductsCard.getData()
 highCbdProductsCard.getImage(data)
 text = highCbdProductsCard.getTweetText()

@@ -197,7 +197,7 @@ class HighThcProducts(TweetCard):
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_title('Above Average THC % (and available quantities)')
+        ax.set_title('Flower - Above Average THC % (and available quantities)')
         plt.show()
         
         
@@ -230,10 +230,16 @@ class HighCbdProducts(TweetCard):
         row_probs = np.full(report_row_len, 1/report_row_len)
         
         # select however many to put in the report (randomly)
-        additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
+        additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=report_row_len, replace=False).tolist()
         
         # select the additional rows by index
         report_rows = report_rows.iloc[additional_rows_idxs]
+            
+        # separate into pure CBD (min THC% < 1%) and blend (min THC% > 1%)
+        cbd_rows = report_rows[report_rows['thc_min'] <= 1.0]
+        blend_rows = report_rows[report_rows[thc_min] > 1.0]
+        # JL TODO - resume here!
+        
         
         # what quantities can you buy this in?      
         quantities = []
@@ -242,6 +248,10 @@ class HighCbdProducts(TweetCard):
             filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
             jar_sizes = filtered_df['Quantity'].tolist()
             quantities.append(jar_sizes)
+            
+        
+            
+            
         
         # bring the data together
         top_brands = list(zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()))
@@ -250,7 +260,7 @@ class HighCbdProducts(TweetCard):
         
         data =  list(zip(top_brands, top_cbd, quantities))
         
-        data = sorted(data, key=lambda x: x[1])
+        data = sorted(data, key=lambda x: x[1], reverse=True)
         return data
     
     def getImage(self, data):
