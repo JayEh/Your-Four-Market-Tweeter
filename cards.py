@@ -236,8 +236,8 @@ class HighCbdProducts(TweetCard):
         report_rows = report_rows.iloc[additional_rows_idxs]
             
         # separate into pure CBD (min THC% < 1%) and blend (min THC% > 1%)
-        cbd_rows = report_rows[report_rows['thc_min'] <= 1.0]
-        blend_rows = report_rows[report_rows[thc_min] > 1.0]
+        cbd_rows = report_rows[report_rows['cbd_min'] <= 1.0]
+        blend_rows = report_rows[report_rows['thc_min'] > 1.0]
         # JL TODO - resume here!
         
         

@@ -26,5 +26,3 @@ highCbdProductsCard.getImage(data)
 text = highCbdProductsCard.getTweetText()
 print(text)
 
-
-
