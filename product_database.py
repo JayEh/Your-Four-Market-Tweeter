@@ -13,6 +13,18 @@ import os
 DB_ROOT = 'C:\\Python\\Cannabrain\\yf1'
 APP_DB = os.path.join(DB_ROOT, 'app_db.db')
 
+def loadDbToDf():
+    columns_list = ['id','adjusted_price_float','AdjustedPrice','Brand','Brand','Cbd',
+               'cbd_avg','cbd_max','cbd_min','DisplayName','dollar_per_gram',
+               'dollar_per_mg_thc','Format','ImageUrl','IsAuthenticated','IsCase',
+               'IsInStock','Link','list_price_float','ListPrice','MasterCaseQuantity',
+               'ProductId','Quantity','QuantityMeasure','SkuId','Strain','Thc',
+               'thc_avg','thc_max','thc_min','Type','VariantId','date']
+    
+    columns_s = ','.join(columns_list)
+    select_sql = f'select {columns_s} from product_history'
+    
+    
 
 # hacky because it connects and drops at each sql statement!
 def hacky_run_sql(sql_string, params=None):
@@ -77,5 +89,6 @@ def saveTweetToHistory(tweet_response_json):
 
 
 inserted_ids = saveProductsToDb(products)
+
 
 
