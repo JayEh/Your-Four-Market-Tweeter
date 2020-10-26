@@ -168,7 +168,7 @@ class HighThcProducts(TweetCard):
         
         companies_and_products = [d[0] for d in data]
         avg_thc = [d[1] for d in data]
-        quantities = [d[2] for d in data]        
+        quantities = [d[2] for d in data]
         companies = [c[0] for c in companies_and_products]
         products = [c[1] for c in companies_and_products]
         
@@ -186,6 +186,7 @@ class HighThcProducts(TweetCard):
         
         bar_colors = [(0.35+(i/(len(data) *3)),0,0) for i in range(len(data))]
         bar_colors[len(bar_colors)-1] = (0.0,0,0)
+        
         ax.barh(y_pos, avg_thc, align='center', color=bar_colors)
         ax.set_ylabel('Brand')
         ax.set_yticks(y_pos)
@@ -215,7 +216,7 @@ class HighThcProducts(TweetCard):
 
 
 class HighCbdProducts(TweetCard):
-    def getData(self):        
+    def getData(self):
         rows = self.rows
         
         # if there's not 1% cbd... exclude
@@ -235,13 +236,10 @@ class HighCbdProducts(TweetCard):
         # select the additional rows by index
         report_rows = report_rows.iloc[additional_rows_idxs]
             
-        # separate into pure CBD (min THC% < 1%) and blend (min THC% > 1%)
-        cbd_rows = report_rows[report_rows['cbd_min'] <= 1.0]
-        blend_rows = report_rows[report_rows['thc_min'] > 1.0]
-        # JL TODO - resume here!
+        # separate into pure CBD (min THC% < 1%) and blend (min THC% > 1%)        
+        report_rows['pure_cbd'] = report_rows['thc_min'].lt(1.0)
         
-        
-        # what quantities can you buy this in?      
+        # what quantities can you buy this in?
         quantities = []
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
             pdf = self.products_df
@@ -249,17 +247,14 @@ class HighCbdProducts(TweetCard):
             jar_sizes = filtered_df['Quantity'].tolist()
             quantities.append(jar_sizes)
             
-        
-            
             
         
         # bring the data together
         top_brands = list(zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()))
-        top_cbd = list((report_rows['cbd_avg']).values)
+        top_cbd = report_rows['cbd_avg'].tolist()
+        pure_cbd = report_rows['pure_cbd'].tolist()
         
-        
-        data =  list(zip(top_brands, top_cbd, quantities))
-        
+        data = list(zip(top_brands, top_cbd, quantities, pure_cbd))
         data = sorted(data, key=lambda x: x[1], reverse=True)
         return data
     

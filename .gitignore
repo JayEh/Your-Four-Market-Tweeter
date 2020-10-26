@@ -5,3 +5,6 @@ app_db_project_file.sqbpro
 app_db.db
 __pycache__/weed_tweeter.cpython-37.pyc
 __pycache__/cards.cpython-37.pyc
+__pycache__/cards.cpython-38.pyc
+__pycache__/weed_tweeter.cpython-38.pyc
+products_pickle.pkl

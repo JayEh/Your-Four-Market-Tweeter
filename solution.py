@@ -12,7 +12,6 @@ scraper = WebScraper()
 products, products_df = scraper.getProductDataFromWeb()
 
 
-
 highThcProductsCard = cards.HighThcProducts(products, products_df, rows=15, figsize=(6,10))
 data = highThcProductsCard.getData()
 highThcProductsCard.getImage(data)
