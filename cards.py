@@ -2,9 +2,10 @@
 """
 Created on Sat Oct 10 14:17:18 2020
 
-@author: jarre
+@author: j
 """
 
+from scipy.special import softmax
 import matplotlib.pyplot as plt
 import numpy as np
 import locale
@@ -12,7 +13,7 @@ import pandas as pd
 from datetime import date
 
 locale.setlocale(locale.LC_ALL, 'en_CA.UTF-8')
-plt.style.use('ggplot')
+plt.style.use('dark_background')
 
 
 # inherit this class
@@ -38,39 +39,100 @@ class GovernmentURLs(TweetCard):
         pass
     
 
-class HighThcCompanies(TweetCard):
+class TopShelfCompanies(TweetCard):
     def getData(self):
-        grouped_by_brand = self.products_df.groupby(['Brand']).mean()
-        grouped_by_brand = grouped_by_brand.sort_values(by=['thc_avg'], ascending=False)
+        rows = self.rows
         
-        top_brands = list(grouped_by_brand[:10].index)
-        top_thc = list(grouped_by_brand['thc_avg'][:10].values)
+        pdf = self.products_df[self.products_df['Quantity'] == '3.5']
         
-        return list(zip(top_brands, top_thc))
+        # calculate the mean + 1std for thc_max, select out those rows
+        df_mean = pdf['adjusted_price_float'].mean()
+        df_std = pdf['adjusted_price_float'].std()
+        
+        report_rows = pdf.groupby(['Brand']).mean()
+        report_rows = report_rows[report_rows['adjusted_price_float'] >= df_mean + df_std]
+        report_rows = report_rows.reset_index()
+        
+        row_idxs = np.arange(len(report_rows))
+
+        row_probs = softmax(report_rows['adjusted_price_float'].tolist())
+
+        
+        # select however many to put in the report (randomly)
+        rows = min(rows, len(report_rows))
+        additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
+        
+        # select the additional rows by index
+        report_rows = report_rows.iloc[additional_rows_idxs]
+        
+        # what quantities can you buy this in?      
+        quantities = []
+        for brand in report_rows['Brand'].tolist():
+            pdf = self.products_df
+            
+            filtered_df = pdf[pdf['Brand'] == brand]
+            
+            jar_sizes = filtered_df['Quantity'].unique().tolist()
+            quantities.append(jar_sizes)
+        
+        # bring the data together
+        top_brands = report_rows['Brand'].tolist()
+        top_prices = list((report_rows['adjusted_price_float']).values)
+        data =  list(zip(top_brands, top_prices, quantities))
+        
+        # add the market average
+        data = sorted(data, key=lambda x: x[1], reverse=False)
+        data.insert(len(data), ('Market Average', round(df_mean, 1), []))
+        return data
+    
     
     def getImage(self, data):
-        fig, ax = plt.subplots()
-
-        companies = [d[0] for d in data] # y axis
-        avg_thc = [d[1] for d in data]   # x axis
+        fig, ax = plt.subplots(figsize=self.figsize)
+        
+        companies = [d[0] for d in data]
+        top_prices = [d[1] for d in data]
+        quantities = [d[2] for d in data]
         
         y_pos = np.arange(len(companies))
         
-        ax.barh(y_pos, avg_thc, align='center')
-        ax.set_title('AGLC - Highest Average THC Content by Brand')
+        # # # # # 
+        
+        # # # # # 
+        
+        # # # # # 
+        
+        # # # # # 
+        
+        for i,company in enumerate(companies):
+            bar_text = company
+            if len(quantities[i]) > 0:
+                q = [str(q)+'g' for q in quantities[i]]
+                q = ', '.join(q)
+                q = f'   ({q})'
+                bar_text += q
+            
+            ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
+            
+        
+        bar_colors = [(75/256,75/256,75/256) for _ in range(len(data))]
+        bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)
+        
+        ax.barh(y_pos, top_prices, align='center', color=bar_colors)
         ax.set_ylabel('Brand')
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(companies)
-        ax.invert_yaxis()  # sort desc
+        ax.set_yticklabels(companies, fontsize=12)
+        
+        # how do I set the font to make it easier to read?
+        
+        formatted_date = date.today().strftime('%B %d, %Y')
+        ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_xlabel('Data collected from AlbertaCannabis.org on {the date}')
-        
+        ax.set_title('Flower - Top Shelf Brands (and available quantities)')
         plt.show()
         
-        # save the figure
-        # return it?
-
+    def getTweetText(self):
+        pass
 
 
 
@@ -111,12 +173,105 @@ class HighValueCompanies(TweetCard):
         # return it?
 
 
+
+
 class HighValueProducts(TweetCard):
     def getData(self):
-        pass
+        rows = self.rows
+        
+        # calculate the mean + 1std for thc_max, select out those rows
+        df_mean = self.products_df['dollar_per_gram'].mean()
+        df_std = self.products_df['dollar_per_gram'].std()
+        
+        report_rows = self.products_df.groupby(['Brand','DisplayName']).mean()
+        report_rows = report_rows[report_rows['dollar_per_gram'] <= df_mean - df_std]
+        report_rows = report_rows.reset_index()
+        
+        row_idxs = np.arange(len(report_rows))        
+        
+        reversed_rows = report_rows['dollar_per_gram'] - report_rows['dollar_per_gram'].max()
+
+        row_probs = softmax(reversed_rows.tolist())
+
+        
+        # select however many to put in the report (randomly)
+        additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
+        
+        # select the additional rows by index
+        report_rows = report_rows.iloc[additional_rows_idxs]
+        
+        # what quantities can you buy this in?      
+        quantities = []
+        for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
+            pdf = self.products_df
+            filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
+            jar_sizes = filtered_df['Quantity'].tolist()
+            quantities.append(jar_sizes)
+        
+        # bring the data together
+        top_brands = list(zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()))
+        top_dpg = list((report_rows['dollar_per_gram']).values)
+        data =  list(zip(top_brands, top_dpg, quantities))
+        
+        # add the market average
+        data = sorted(data, key=lambda x: x[1], reverse=True)
+        data.insert(len(data), (('Market Average',''), round(df_mean, 1), []))
+        return data
+        
     
-    def getImage(self):
+    def getImage(self, data):
+        fig, ax = plt.subplots(figsize=self.figsize)
+        
+        companies_and_products = [d[0] for d in data]
+        avg_dpg = [d[1] for d in data]
+        quantities = [d[2] for d in data]
+        companies = [c[0] for c in companies_and_products]
+        products = [c[1] for c in companies_and_products]
+        
+        y_pos = np.arange(len(companies_and_products))
+        
+        for i,product_name in enumerate(products):
+            
+            bar_text = product_name
+            
+            if len(quantities[i]) > 0:
+                q = [str(q)+'g' for q in quantities[i]]
+                q = ', '.join(q)
+                q = f'   ({q})'
+                bar_text += q
+            
+            
+            if i == len(products)-1: 
+                dollars_per_gram = locale.currency(avg_dpg[i]) + ' / gram'
+                t_color = 'white' 
+            else: 
+                dollars_per_gram = ''
+                t_color = 'black'
+            
+            ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
+            ax.text(0.5, i, dollars_per_gram, verticalalignment='center', color=t_color, fontsize=12)
+            
+        
+        bar_colors = [(75/256,75/256,75/256) for _ in range(len(data))]
+        bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)
+        
+        ax.barh(y_pos, avg_dpg, align='center', color=bar_colors)
+        ax.set_ylabel('Brand')
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(companies, fontsize=12)
+        
+        # how do I set the font to make it easier to read?
+        
+        formatted_date = date.today().strftime('%B %d, %Y')
+        ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
+        
+        ax.set_xticks([])
+        ax.set_title('Flower - High Value (and available quantities)')
+        plt.show()
+
+    def getTweetText(self):
         pass
+
 
 
 class HighThcProducts(TweetCard):
@@ -135,7 +290,7 @@ class HighThcProducts(TweetCard):
         report_rows = report_rows[report_rows['thc_max'] >= df_mean + df_std]
         report_rows = report_rows.reset_index()
         row_idxs = np.arange(len(report_rows))
-        row_probs = np.full(len(report_rows), 1/len(report_rows))
+        row_probs = softmax(report_rows['thc_max'].tolist())
         
         # select however many to put in the report (randomly)
         additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
@@ -159,7 +314,6 @@ class HighThcProducts(TweetCard):
         # add the market average
         data = sorted(data, key=lambda x: x[1])
         data.insert(len(data), (('Market Average',''), round(df_mean, 1), []))
-        
         return data
     
     
@@ -185,12 +339,12 @@ class HighThcProducts(TweetCard):
             ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
         
         bar_colors = [(0.35+(i/(len(data) *3)),0,0) for i in range(len(data))]
-        bar_colors[len(bar_colors)-1] = (0.0,0,0)
+        bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)
         
         ax.barh(y_pos, avg_thc, align='center', color=bar_colors)
         ax.set_ylabel('Brand')
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(companies)
+        ax.set_yticklabels(companies, fontsize=12)
         
         # how do I set the font to make it easier to read?
         
@@ -239,6 +393,9 @@ class HighCbdProducts(TweetCard):
         # separate into pure CBD (min THC% < 1%) and blend (min THC% > 1%)        
         report_rows['pure_cbd'] = report_rows['thc_min'].lt(1.0)
         
+        self.pure_cbd_count =  report_rows['pure_cbd'].sum()
+        self.blend_count = len(report_rows['pure_cbd']) - report_rows['pure_cbd'].sum()
+        
         # what quantities can you buy this in?
         quantities = []
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
@@ -255,18 +412,63 @@ class HighCbdProducts(TweetCard):
         pure_cbd = report_rows['pure_cbd'].tolist()
         
         data = list(zip(top_brands, top_cbd, quantities, pure_cbd))
-        data = sorted(data, key=lambda x: x[1], reverse=True)
+        data = sorted(data, key=lambda x: x[1], reverse=False)
         return data
     
     def getImage(self, data):
-        pass
+        fig, ax = plt.subplots(figsize=self.figsize)
+        
+        companies_and_products = [d[0] for d in data]
+        avg_cbd = [d[1] for d in data]
+        quantities = [d[2] for d in data]
+        pure_cbd = [d[3] for d in data]
+        
+        companies = [c[0] for c in companies_and_products]
+        products = [c[1] for c in companies_and_products]
+        
+        y_pos = np.arange(len(companies_and_products))
+        
+        for i,product_name in enumerate(products):
+            bar_text = product_name
+            if len(quantities[i]) > 0:
+                q = [str(q)+'g' for q in quantities[i]]
+                q = ', '.join(q)
+                q = f'   ({q})'
+                bar_text += q
+            
+            ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
+        
+        
+        green = (10/256,75/256,10/256)
+        blue = (0/256,120/256,120/256)
+        lookup = {
+            True: blue,
+            False: green
+            }
+        
+        bar_colors = [lookup[d] for d in pure_cbd]
+        
+        ax.barh(y_pos, avg_cbd, align='center', color=bar_colors)
+        ax.set_ylabel('Brand')
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(companies, fontsize=12)
+        
+        # how do I set the font to make it easier to read?
+        
+        formatted_date = date.today().strftime('%B %d, %Y')
+        ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
+        
+        ax.set_xticks([])
+        ax.set_title('Flower - CBD and CBD/THC (and available quantities)')
+        plt.show()
 
     def getTweetText(self):
-        pass
-
-
-
-
+        tweet_text = (
+            f'The Alberta market currently has a low selection of CBD products. '
+            f'Check out these {self.pure_cbd_count} CBD products and another {self.blend_count} with THC/CBD.'
+            )
+        
+        return tweet_text
 
 
 

@@ -2,14 +2,13 @@
 """
 Created on Thu Oct  1 12:53:41 2020
 
-@author: Jarrett
+@author: j
 """
 
 from datetime import datetime
 import subprocess
 import json
 import pandas as pd
-import pickle
 import os
 
 

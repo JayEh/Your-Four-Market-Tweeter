@@ -2,7 +2,7 @@
 """
 Created on Fri Oct 16 12:44:15 2020
 
-@author: Jarrett
+@author: j
 """
 
 from TwitterAPI import TwitterAPI
