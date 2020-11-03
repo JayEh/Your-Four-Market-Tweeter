@@ -25,7 +25,7 @@ highCbdProductsCard.getImage(data)
 text = highCbdProductsCard.getTweetText()
 print(text)
 
-highValueProductsCard = cards.HighValueProducts(products, products_df, rows=20, figsize=(7.5,10))
+highValueProductsCard = cards.HighValueProducts(products, products_df, rows=25, figsize=(7.5,10))
 data = highValueProductsCard.getData()
 highValueProductsCard.getImage(data)
 text = highValueProductsCard.getTweetText()
@@ -38,6 +38,10 @@ text = tsc.getTweetText()
 print(text)
 
 
+
+
+
+# and then the govt URLs !!
 
 
 

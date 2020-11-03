@@ -95,13 +95,6 @@ class TopShelfCompanies(TweetCard):
         
         y_pos = np.arange(len(companies))
         
-        # # # # # 
-        
-        # # # # # 
-        
-        # # # # # 
-        
-        # # # # # 
         
         for i,company in enumerate(companies):
             bar_text = company
@@ -123,7 +116,6 @@ class TopShelfCompanies(TweetCard):
         ax.set_yticklabels(companies, fontsize=12)
         
         # how do I set the font to make it easier to read?
-        
         formatted_date = date.today().strftime('%B %d, %Y')
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
