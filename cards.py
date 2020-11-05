@@ -39,7 +39,7 @@ class GovernmentURLs(TweetCard):
         pass
     
 
-class TopShelfCompanies(TweetCard):
+class TopDollarCompanies(TweetCard):
     def getData(self):
         rows = self.rows
         
@@ -52,14 +52,11 @@ class TopShelfCompanies(TweetCard):
         report_rows = pdf.groupby(['Brand']).mean()
         report_rows = report_rows[report_rows['adjusted_price_float'] >= df_mean + df_std]
         report_rows = report_rows.reset_index()
-        
-        row_idxs = np.arange(len(report_rows))
-
         row_probs = softmax(report_rows['adjusted_price_float'].tolist())
-
         
         # select however many to put in the report (randomly)
         rows = min(rows, len(report_rows))
+        row_idxs = np.arange(len(report_rows))
         additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
         
         # select the additional rows by index
@@ -91,21 +88,17 @@ class TopShelfCompanies(TweetCard):
         
         companies = [d[0] for d in data]
         top_prices = [d[1] for d in data]
-        quantities = [d[2] for d in data]
+        # quantities = [d[2] for d in data]
         
         y_pos = np.arange(len(companies))
+        average_price = locale.currency(top_prices[len(data)-1]) + ' / 3.5g'
+        
+                
+        
+        ax.text(1.0, len(data)-1, average_price, verticalalignment='center', color='white', fontsize=12)
         
         
-        for i,company in enumerate(companies):
-            bar_text = company
-            if len(quantities[i]) > 0:
-                q = [str(q)+'g' for q in quantities[i]]
-                q = ', '.join(q)
-                q = f'   ({q})'
-                bar_text += q
-            
-            ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
-            
+        
         
         bar_colors = [(75/256,75/256,75/256) for _ in range(len(data))]
         bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)
@@ -120,7 +113,7 @@ class TopShelfCompanies(TweetCard):
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_title('Flower - Top Shelf Brands (and available quantities)')
+        ax.set_title('Flower - Top Dollar Eighths (3.5g)')
         plt.show()
         
     def getTweetText(self):

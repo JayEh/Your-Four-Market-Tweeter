@@ -31,10 +31,10 @@ highValueProductsCard.getImage(data)
 text = highValueProductsCard.getTweetText()
 print(text)
 
-tsc = cards.TopShelfCompanies(products, products_df, rows=20, figsize=(7.5,10))
-data = tsc.getData()
-tsc.getImage(data)
-text = tsc.getTweetText()
+tdc = cards.TopDollarCompanies(products, products_df, rows=20, figsize=(7.5,10))
+data = tdc.getData()
+tdc.getImage(data)
+text = tdc.getTweetText()
 print(text)
 
 
