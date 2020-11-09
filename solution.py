@@ -40,47 +40,75 @@ print(text)
 
 
 
-
-schedule = {
-    'daily': [
-        {
-            'card': cards.HighThcProducts,
-            'time': 9
-        },{
-            'card': cards.HighCbdProducts,
-            'time': 9
-        },{
-            'card': cards.HighValueProducts,
-            'time': 9
-        },{
-            'card': cards.TopDollarCompanies,
-            'time': 9
+class TaskRunner():
+    def __init__(self):
+        self.schedule = {
+            'daily': [
+                {
+                    'card': cards.HighThcProducts,
+                    'hour': 9
+                },{
+                    'card': cards.HighCbdProducts,
+                    'hour': 9
+                },{
+                    'card': cards.HighValueProducts,
+                    'hour': 9
+                },{
+                    'card': cards.TopDollarCompanies,
+                    'hour': 9
+                }
+            ],
+            'weekly': [
+                {
+                    'card': 'add the govt urls!',
+                    'day_of_week': 1,  # monday
+                    'hour': 8
+                }
+            ]    
         }
-    ],
-    'weekly': [
-        {
-            'card': 'add the govt urls!',
-            'day_of_week': 1,  # monday
-            'time': 8
-        }
-    ]    
-}
-
+    
+    
+    def getRunnableTasks(self):
+        # get the current time
+        now = datetime.now() # device timezone
+        
+        # check against the schedule
+        cards = [x['card'] for x in self.schedule['daily'] if x['hour'] == now.hour]
+        
+        # check if it's already been done today (db query)
+        already_run = False
+        
+        # run or skip as required
+        if already_run == False:
+            ans = 1 + 1
+            
+            # run task
+            # update db with results
+            
+            
+    
+    
+    def runTask(self, card):
+        data = card.getData()
+        image = card.getImage(data)
+        text = card.getTweetText()
+        return (data, image, text)
 
 
 
 # and then the govt URLs !!
 
 def main():
+    runner = TaskRunner()
     running = True
     
-    # check the time
-    
-    # run any tasks
-    
-    # sleep a minute?  repeat
     while(running):
-        
+        tasks = runner.getRunnableTasks()
+        for t in tasks:
+            results = runner.runTask(t)
+
+            # take these results and tweet them !
+            
         
         time.sleep(0.5)
         running = False

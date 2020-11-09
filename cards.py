@@ -38,8 +38,7 @@ class GovernmentURLs(TweetCard):
         pass
     
     
-    def getTweetText(self):
-        
+    def getTweetText(self):        
         pass
     
     
