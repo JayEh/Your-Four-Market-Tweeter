@@ -31,12 +31,18 @@ class GovernmentURLs(TweetCard):
         # https://www150.statcan.gc.ca/n1/pub/13-610-x/13-610-x2018001-eng.htm
         # https://www.canada.ca/en/health-canada/services/publications/drugs-health-products/canadian-cannabis-survey-2019-summary.html
         # https://surveys-enquetes.statcan.gc.ca/cannabis/
-        
         pass
     
     
     def getImage(self):
         pass
+    
+    
+    def getTweetText(self):
+        
+        pass
+    
+    
     
 
 class TopDollarCompanies(TweetCard):
@@ -79,7 +85,7 @@ class TopDollarCompanies(TweetCard):
         
         # add the market average
         data = sorted(data, key=lambda x: x[1], reverse=False)
-        data.insert(len(data), ('Market Average', round(df_mean, 1), []))
+        data.insert(len(data), ('Market Average (3.5g only)', round(df_mean, 1), []))
         return data
     
     
@@ -106,7 +112,7 @@ class TopDollarCompanies(TweetCard):
         ax.barh(y_pos, top_prices, align='center', color=bar_colors)
         ax.set_ylabel('Brand')
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(companies, fontsize=12)
+        ax.set_yticklabels(companies, fontsize=13)
         
         # how do I set the font to make it easier to read?
         formatted_date = date.today().strftime('%B %d, %Y')
@@ -233,8 +239,8 @@ class HighValueProducts(TweetCard):
                 dollars_per_gram = ''
                 t_color = 'black'
             
-            ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
-            ax.text(0.5, i, dollars_per_gram, verticalalignment='center', color=t_color, fontsize=12)
+            ax.text(0.25, i, bar_text, verticalalignment='center', color='white')
+            ax.text(0.25, i, dollars_per_gram, verticalalignment='center', color=t_color, fontsize=12)
             
         
         bar_colors = [(75/256,75/256,75/256) for _ in range(len(data))]
@@ -278,6 +284,7 @@ class HighThcProducts(TweetCard):
         row_probs = softmax(report_rows['thc_max'].tolist())
         
         # select however many to put in the report (randomly)
+        rows = min(rows, len(report_rows))
         additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
         
         # select the additional rows by index
@@ -321,7 +328,7 @@ class HighThcProducts(TweetCard):
                 q = f'   ({q})'
                 bar_text += q
             
-            ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
+            ax.text(1.0, i, bar_text, verticalalignment='center', color='white')
         
         bar_colors = [(0.35+(i/(len(data) *3)),0,0) for i in range(len(data))]
         bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)
