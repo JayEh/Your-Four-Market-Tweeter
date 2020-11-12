@@ -32,11 +32,5 @@ def postTweet(tweet_text):
     r = api.request('statuses/update', {'status': tweet_text})
     
     print('SUCCESS' if r.status_code == 200 else 'PROBLEM: ' + r.text)
-    
-    # str(r.json())
-    
-    pass
-
-
-
+    print(str(r.json()))
 

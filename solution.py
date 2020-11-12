@@ -32,7 +32,7 @@ highValueProductsCard.getImage(data)
 text = highValueProductsCard.getTweetText()
 print(text)
 
-tdc = cards.TopDollarCompanies(products, products_df, rows=25, figsize=(7.5,10))
+tdc = cards.TopDollarProducts(products, products_df, rows=25, figsize=(7.5,10))
 data = tdc.getData()
 tdc.getImage(data)
 text = tdc.getTweetText()
@@ -54,7 +54,7 @@ class TaskRunner():
                     'card': cards.HighValueProducts,
                     'hour': 9
                 },{
-                    'card': cards.TopDollarCompanies,
+                    'card': cards.TopDollarProducts,
                     'hour': 9
                 }
             ],
@@ -64,7 +64,7 @@ class TaskRunner():
                     'day_of_week': 1,  # monday
                     'hour': 8
                 }
-            ]    
+            ]
         }
     
     
@@ -96,7 +96,6 @@ class TaskRunner():
 
 
 
-# and then the govt URLs !!
 
 def main():
     runner = TaskRunner()

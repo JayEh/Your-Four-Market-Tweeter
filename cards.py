@@ -23,28 +23,34 @@ class TweetCard():
         self.products_df = products_df
         self.rows = rows
         self.figsize = figsize
+        self.y_font_size = 12
 
 
 class GovernmentURLs(TweetCard):
     def getData(self):
+        # the top link is basically a root page for the others 
         # https://www.canada.ca/en/health-canada/services/drugs-medication/cannabis.html
         # https://www150.statcan.gc.ca/n1/pub/13-610-x/13-610-x2018001-eng.htm
         # https://www.canada.ca/en/health-canada/services/publications/drugs-health-products/canadian-cannabis-survey-2019-summary.html
         # https://surveys-enquetes.statcan.gc.ca/cannabis/
-        pass
+        return None
     
     
-    def getImage(self):
-        pass
+    def getImage(self, data):
+        return None
     
     
-    def getTweetText(self):        
-        pass
+    def getTweetText(self):
+        text = """
+            Remember! Stay informed and use cannabis responsibly. 
+            https://www.canada.ca/en/health-canada/services/drugs-medication/cannabis.html
+            """
+        return text
     
     
     
 
-class TopDollarCompanies(TweetCard):
+class TopDollarProducts(TweetCard):
     def getData(self):
         rows = self.rows
         
@@ -66,25 +72,15 @@ class TopDollarCompanies(TweetCard):
         
         # select the additional rows by index
         report_rows = report_rows.iloc[additional_rows_idxs]
-        
-        # what quantities can you buy this in?      
-        quantities = []
-        for brand in report_rows['Brand'].tolist():
-            pdf = self.products_df
-            
-            filtered_df = pdf[pdf['Brand'] == brand]
-            
-            jar_sizes = filtered_df['Quantity'].unique().tolist()
-            quantities.append(jar_sizes)
-        
+                
         # bring the data together
         top_brands = report_rows['Brand'].tolist()
         top_prices = list((report_rows['adjusted_price_float']).values)
-        data =  list(zip(top_brands, top_prices, quantities))
+        data =  list(zip(top_brands, top_prices))
         
         # add the market average
         data = sorted(data, key=lambda x: x[1], reverse=False)
-        data.insert(len(data), ('Market Average (3.5g only)', round(df_mean, 1), []))
+        data.insert(len(data), ('Market Average (3.5g only)', round(df_mean, 1)))
         return data
     
     
@@ -92,37 +88,35 @@ class TopDollarCompanies(TweetCard):
         fig, ax = plt.subplots(figsize=self.figsize)
         
         companies = [d[0] for d in data]
-        top_prices = [d[1] for d in data]
-        # quantities = [d[2] for d in data]
-        
+        top_prices = [d[1] for d in data]        
         y_pos = np.arange(len(companies))
-        average_price = locale.currency(top_prices[len(data)-1]) + ' / 3.5g'
         
-                
-        
-        ax.text(1.0, len(data)-1, average_price, verticalalignment='center', color='white', fontsize=12)
-        
-        
+        for i, price in enumerate(top_prices):
+            average_price = locale.currency(top_prices[i]) + ' / 3.5g'
+            ax.text(1.0, i, average_price, verticalalignment='center', color='white', fontsize=12)
         
         
         bar_colors = [(75/256,75/256,75/256) for _ in range(len(data))]
         bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)
         
         ax.barh(y_pos, top_prices, align='center', color=bar_colors)
-        ax.set_ylabel('Brand')
+        ax.set_ylabel('Brand', fontsize=self.y_font_size)
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(companies, fontsize=13)
+        ax.set_yticklabels(companies, fontsize=self.y_font_size)
         
-        # how do I set the font to make it easier to read?
         formatted_date = date.today().strftime('%B %d, %Y')
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_title('Flower - Top Dollar Eighths (3.5g)')
+        ax.set_title('Flower - Top Dollar Eighths (3.5g) Average Selling Price')
         plt.show()
         
     def getTweetText(self):
-        pass
+        text = (
+            f'Here are {self.rows} of the highest THC strains on the market. '
+            f'Check back daily for a different {self.rows}.'
+            )
+        return text
 
 
 
@@ -145,9 +139,9 @@ class HighValueCompanies(TweetCard):
         y_pos = np.arange(len(top_brands))
         
         ax.barh(y_pos, dpg, align='center')
-        ax.set_ylabel('Brand')
+        ax.set_ylabel('Brand', fontsize=self.y_font_size)
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(top_brands)
+        ax.set_yticklabels(top_brands, fontsize=self.y_font_size)
         ax.invert_yaxis()  # sort desc
         
         for i,d in enumerate(data):
@@ -159,6 +153,7 @@ class HighValueCompanies(TweetCard):
         ax.set_title('AGLC - Lowest Average Dollar Per Gram by Brand')
         plt.show()
         
+        plt.savefig('my_figure.svg', bbox_inches='tight')
         # save the figure
         # return it?
 
@@ -176,13 +171,9 @@ class HighValueProducts(TweetCard):
         report_rows = self.products_df.groupby(['Brand','DisplayName']).mean()
         report_rows = report_rows[report_rows['dollar_per_gram'] <= df_mean - df_std]
         report_rows = report_rows.reset_index()
-        
-        row_idxs = np.arange(len(report_rows))        
-        
-        reversed_rows = report_rows['dollar_per_gram'] - report_rows['dollar_per_gram'].max()
-
+        row_idxs = np.arange(len(report_rows)) 
+        reversed_rows = report_rows['dollar_per_gram'] * -1 
         row_probs = softmax(reversed_rows.tolist())
-
         
         # select however many to put in the report (randomly)
         additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
@@ -246,11 +237,9 @@ class HighValueProducts(TweetCard):
         bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)
         
         ax.barh(y_pos, avg_dpg, align='center', color=bar_colors)
-        ax.set_ylabel('Brand')
+        ax.set_ylabel('Brand', fontsize=self.y_font_size)
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(companies, fontsize=12)
-        
-        # how do I set the font to make it easier to read?
+        ax.set_yticklabels(companies, fontsize=self.y_font_size)
         
         formatted_date = date.today().strftime('%B %d, %Y')
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
@@ -333,9 +322,9 @@ class HighThcProducts(TweetCard):
         bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)
         
         ax.barh(y_pos, avg_thc, align='center', color=bar_colors)
-        ax.set_ylabel('Brand')
+        ax.set_ylabel('Brand', fontsize=self.y_font_size)
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(companies, fontsize=12)
+        ax.set_yticklabels(companies, fontsize=self.y_font_size)
         
         # how do I set the font to make it easier to read?
         
@@ -440,9 +429,9 @@ class HighCbdProducts(TweetCard):
         bar_colors = [lookup[d] for d in pure_cbd]
         
         ax.barh(y_pos, avg_cbd, align='center', color=bar_colors)
-        ax.set_ylabel('Brand')
+        ax.set_ylabel('Brand', fontsize=self.y_font_size)
         ax.set_yticks(y_pos)
-        ax.set_yticklabels(companies, fontsize=12)
+        ax.set_yticklabels(companies, fontsize=self.y_font_size)
         
         # how do I set the font to make it easier to read?
         
