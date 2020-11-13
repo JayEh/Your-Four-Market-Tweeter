@@ -5,7 +5,7 @@ Created on Fri Oct  9 12:31:38 2020
 @author: j
 """
 
-
+from datetime import datetime
 import sqlite3
 import os
 
@@ -77,9 +77,29 @@ def saveProductsToDb(products):
     return inserted_ids
 
 
-def saveTweetToHistory(tweet_response_json):
-    insert_sql = 'INSERT INTO tweet_history (response_json) VALUES (?)'
-    col_params = [tweet_response_json]
+def saveTweetToHistory(tweet_response_json, category):
+    """
+    
+
+    Parameters
+    ----------
+    tweet_response_json : str
+        Response from the Twitter API.
+    category : str
+        Either 'media' or 'tweet'.
+
+    Returns
+    -------
+    inserted_id : int
+        The id of the inserted row.
+
+    """
+    col_names = ['response_json','category','date']
+    col_names_string = ','.join(col_names)
+    col_param_placeholders = ','.join(['?' for _ in range(len(col_names))])
+    
+    insert_sql = f'INSERT INTO tweet_history ({col_names_string}) VALUES ({col_param_placeholders})'
+    col_params = [tweet_response_json, category, str(datetime.now())]
     
     sqlConnection = sqlite3.connect(APP_DB)
     c = sqlConnection.cursor()
@@ -90,6 +110,11 @@ def saveTweetToHistory(tweet_response_json):
     sqlConnection.close()
     
     return inserted_id
+
+
+# load all the rows from the table and return a df
+def loadTweetHistory():
+    pass
 
 
 inserted_ids = saveProductsToDb(products)

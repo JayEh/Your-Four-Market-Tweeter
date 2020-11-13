@@ -18,12 +18,15 @@ plt.style.use('dark_background')
 
 # inherit this class
 class TweetCard():
-    def __init__(self, products, products_df, rows, figsize):
+    def __init__(self, products=None, products_df=None, rows=None, figsize=None, filename=None):
         self.products = products
         self.products_df = products_df
         self.rows = rows
         self.figsize = figsize
         self.y_font_size = 12
+        self.filename = f'./generated/{filename}.png'
+        
+        self.hashtags = ['#alberta', '#abcannabis', '#canadiancannabis', '#yyccannabis', '#yegcannabis', '#canadianweed ']
 
 
 class GovernmentURLs(TweetCard):
@@ -41,10 +44,12 @@ class GovernmentURLs(TweetCard):
     
     
     def getTweetText(self):
-        text = """
-            Remember! Stay informed and use cannabis responsibly. 
-            https://www.canada.ca/en/health-canada/services/drugs-medication/cannabis.html
-            """
+        hashtags = ' '.join(self.hashtags)
+        text = (
+            'Remember! Stay informed and use cannabis responsibly. \r\n'
+            'https://www.canada.ca/en/health-canada/services/drugs-medication/cannabis.html \r\n'
+            f'{hashtags}'
+            )
         return text
     
     
@@ -67,6 +72,7 @@ class TopDollarProducts(TweetCard):
         
         # select however many to put in the report (randomly)
         rows = min(rows, len(report_rows))
+        self.actual_rows = rows
         row_idxs = np.arange(len(report_rows))
         additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
         
@@ -108,13 +114,17 @@ class TopDollarProducts(TweetCard):
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_title('Flower - Top Dollar Eighths (3.5g) Average Selling Price')
+        ax.set_title('Alberta Bud Report \nTop Dollar Eighths (3.5g) Average Selling Price \n and what about now')
+        plt.savefig(self.filename, bbox_inches='tight')
         plt.show()
         
+        
     def getTweetText(self):
+        hashtags = ' '.join(self.hashtags)
         text = (
-            f'Here are {self.rows} of the highest THC strains on the market. '
-            f'Check back daily for a different {self.rows}.'
+            f'Here are {self.actual_rows} of the highest THC strains on the market. '
+            'Check back daily for more suggestions! \r\n'
+            f'{hashtags}'
             )
         return text
 
@@ -153,7 +163,7 @@ class HighValueCompanies(TweetCard):
         ax.set_title('AGLC - Lowest Average Dollar Per Gram by Brand')
         plt.show()
         
-        plt.savefig('my_figure.svg', bbox_inches='tight')
+        plt.savefig('my_figure.png', bbox_inches='tight')
         # save the figure
         # return it?
 
@@ -245,7 +255,11 @@ class HighValueProducts(TweetCard):
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_title('Flower - High Value (and available quantities)')
+        ax.set_title((
+            'Alberta Bud Report \n'
+            'High Value (and available quantities)'
+            ))
+        plt.savefig(self.filename, bbox_inches='tight')
         plt.show()
 
     def getTweetText(self):
@@ -332,7 +346,11 @@ class HighThcProducts(TweetCard):
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_title('Flower - Above Average THC % (and available quantities)')
+        ax.set_title((
+            'Alberta Bud Report \n'
+            'Above Average THC % (and available quantities)'
+            ))
+        plt.savefig(self.filename, bbox_inches='tight')
         plt.show()
         
         
@@ -350,6 +368,7 @@ class HighThcProducts(TweetCard):
 
 
 class HighCbdProducts(TweetCard):
+    
     def getData(self):
         rows = self.rows
         
@@ -369,7 +388,7 @@ class HighCbdProducts(TweetCard):
         
         # select the additional rows by index
         report_rows = report_rows.iloc[additional_rows_idxs]
-            
+        
         # separate into pure CBD (min THC% < 1%) and blend (min THC% > 1%)        
         report_rows['pure_cbd'] = report_rows['thc_min'].lt(1.0)
         
@@ -384,8 +403,6 @@ class HighCbdProducts(TweetCard):
             jar_sizes = filtered_df['Quantity'].tolist()
             quantities.append(jar_sizes)
             
-            
-        
         # bring the data together
         top_brands = list(zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()))
         top_cbd = report_rows['cbd_avg'].tolist()
@@ -439,7 +456,11 @@ class HighCbdProducts(TweetCard):
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_title('Flower - CBD and CBD/THC (and available quantities)')
+        ax.set_title((
+            'Alberta Bud Report \n'
+            'CBD (blue) and CBD/THC (green) (and available quantities)'
+            ))
+        plt.savefig(self.filename, bbox_inches='tight')
         plt.show()
 
     def getTweetText(self):

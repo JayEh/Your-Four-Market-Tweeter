@@ -27,9 +27,12 @@ def getTwitterApi():
     return api
 
 
-def postTweet(tweet_text):
+def postTweet(tweet_text, category):
     api = getTwitterApi()    
     r = api.request('statuses/update', {'status': tweet_text})
+    
+    # save this tweet response json and the category to the DB! 
+    # category should be 'media' or 'tweet'
     
     print('SUCCESS' if r.status_code == 200 else 'PROBLEM: ' + r.text)
     print(str(r.json()))

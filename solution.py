@@ -9,53 +9,75 @@ from weed_tweeter import WebScraper
 from datetime import datetime
 import cards
 import time
+import twitter_api
 
 
 scraper = WebScraper()
 products, products_df = scraper.getProductDataFromWeb()
 
-highThcProductsCard = cards.HighThcProducts(products, products_df, rows=25, figsize=(7.5,10))
+highThcProductsCard = cards.HighThcProducts(products, products_df, rows=25, figsize=(7.5,10), filename='high_thc_products')
 data = highThcProductsCard.getData()
 highThcProductsCard.getImage(data)
 text = highThcProductsCard.getTweetText()
 print(text)
 
-highCbdProductsCard = cards.HighCbdProducts(products, products_df, rows=25, figsize=(7.5,10))
+highCbdProductsCard = cards.HighCbdProducts(products, products_df, rows=25, figsize=(7.5,10), filename='high_cbd_products')
 data = highCbdProductsCard.getData()
 highCbdProductsCard.getImage(data)
 text = highCbdProductsCard.getTweetText()
 print(text)
 
-highValueProductsCard = cards.HighValueProducts(products, products_df, rows=25, figsize=(7.5,10))
+highValueProductsCard = cards.HighValueProducts(products, products_df, rows=25, figsize=(7.5,10), filename='high_value_products')
 data = highValueProductsCard.getData()
 highValueProductsCard.getImage(data)
 text = highValueProductsCard.getTweetText()
 print(text)
 
-tdc = cards.TopDollarProducts(products, products_df, rows=25, figsize=(7.5,10))
+tdc = cards.TopDollarProducts(products, products_df, rows=25, figsize=(7.5,10), filename='top_dollar_products')
 data = tdc.getData()
 tdc.getImage(data)
 text = tdc.getTweetText()
 print(text)
 
+urls = cards.GovernmentURLs()
+text = urls.getTweetText()
+
 
 
 class TaskRunner():
     def __init__(self):
+        
+        hour = 17
+        
+        rows = 25
+        figsize=(7.5,10)
+        
         self.schedule = {
             'daily': [
                 {
-                    'card': cards.HighThcProducts,
-                    'hour': 9
+                    'card': cards.HighThcProducts,                    
+                    'hour': hour,
+                    'rows': rows,
+                    'figsize': figsize,
+                    'filename': 'HighThcProducts'
                 },{
                     'card': cards.HighCbdProducts,
-                    'hour': 9
+                    'hour': hour,
+                    'rows': rows,
+                    'figsize': figsize,
+                    'filename': 'HighCbdProducts'
                 },{
                     'card': cards.HighValueProducts,
-                    'hour': 9
+                    'hour': hour,
+                    'rows': rows,
+                    'figsize': figsize,
+                    'filename': 'HighValueProducts'
                 },{
                     'card': cards.TopDollarProducts,
-                    'hour': 9
+                    'hour': hour,
+                    'rows': rows,
+                    'figsize': figsize,
+                    'filename': 'TopDollarProducts'
                 }
             ],
             'weekly': [
@@ -73,26 +95,20 @@ class TaskRunner():
         now = datetime.now() # device timezone
         
         # check against the schedule
-        cards = [x['card'] for x in self.schedule['daily'] if x['hour'] == now.hour]
+        tasks = [x for x in self.schedule['daily'] if x['hour'] == now.hour]
         
-        # check if it's already been done today (db query)
-        already_run = False
-        
-        # run or skip as required
-        if already_run == False:
-            ans = 1 + 1
-            
-            # run task
-            # update db with results
+        return tasks
             
             
     
-    
-    def runTask(self, card):
+    # products=None, products_df=None, rows=None, figsize=None, filename=None
+    def runTask(self, task):
+        card = task['card'](products, products_df, task['rows'], task['figsize'], task['filename'])
+        
         data = card.getData()
-        image = card.getImage(data)
+        card.getImage(data)
         text = card.getTweetText()
-        return (data, image, text)
+        return (data, task['filename'], text)
 
 
 
@@ -104,9 +120,18 @@ def main():
     while(running):
         tasks = runner.getRunnableTasks()
         for t in tasks:
+            # has the task already run? skip if so
+            
             results = runner.runTask(t)
 
+            tweet_text = results[2]
+
             # take these results and tweet them !
+            
+            twitter_api.postTweet(tweet_text)
+            
+            # be kind to the api
+            time.sleep(5)
             
         
         time.sleep(0.5)
