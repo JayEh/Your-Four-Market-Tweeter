@@ -8,6 +8,8 @@ Created on Fri Oct 16 12:44:15 2020
 from TwitterAPI import TwitterAPI
 import json
 
+import product_database
+
 key_location = 'C:\\Python\\Cannabrain\\api_keys.json'
 
 def loadApiKeys():
@@ -27,7 +29,7 @@ def getTwitterApi():
     return api
 
 
-def postTweet(tweet_text, category):
+def postTweet(tweet_text):
     api = getTwitterApi()    
     r = api.request('statuses/update', {'status': tweet_text})
     
@@ -37,3 +39,18 @@ def postTweet(tweet_text, category):
     print('SUCCESS' if r.status_code == 200 else 'PROBLEM: ' + r.text)
     print(str(r.json()))
 
+
+def postMedia(file):
+    pass
+
+
+    # file = open(IMAGE_PATH, 'rb')
+    # data = file.read()
+    # r = api.request('media/upload', None, {'media': data})
+    # print('UPLOAD MEDIA SUCCESS' if r.status_code == 200 else 'UPLOAD MEDIA FAILURE: ' + r.text)
+    
+    
+    # if r.status_code == 200:
+    # media_id = r.json()['media_id']
+    # r = api.request('statuses/update', {'status': TWEET_TEXT, 'media_ids': media_id})
+    # print('UPDATE STATUS SUCCESS' if r.status_code == 200 else 'UPDATE STATUS FAILURE: ' + r.text)

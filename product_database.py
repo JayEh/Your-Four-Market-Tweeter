@@ -25,7 +25,13 @@ def loadDbToDf():
     columns_s = ','.join(columns_list)
     select_sql = f'select {columns_s} from product_history'
     
-    
+
+
+# load all the rows from the table and return a df
+def loadTweetHistory():
+    pass
+
+
 
 # hacky because it connects and drops at each sql statement!
 def hacky_run_sql(c, sqlConnection, sql_string, params=None):
@@ -77,10 +83,21 @@ def saveProductsToDb(products):
     return inserted_ids
 
 
-def saveTweetToHistory(tweet_response_json, category):
-    """
+def hasTaskRunToday(task, date):
+    sql = "SELECT * FROM tweet_history WHERE DATE(date)=DATE(?) AND card_type=('?')"
+    date_where = f'{date.year}-{date.month}-{date.day}'
+    params = [date_where, task['filename']]
     
+    sqlConnection = sqlite3.connect(APP_DB)
+    c = sqlConnection.cursor()
+    results = hacky_run_sql(c, sqlConnection, sql, params)
+    sqlConnection.close()
+    
+    return len(results) > 0
+        
 
+def saveTweetToHistory(tweet_response_json, category, card_type):
+    """
     Parameters
     ----------
     tweet_response_json : str
@@ -92,8 +109,8 @@ def saveTweetToHistory(tweet_response_json, category):
     -------
     inserted_id : int
         The id of the inserted row.
-
     """
+    
     col_names = ['response_json','category','date']
     col_names_string = ','.join(col_names)
     col_param_placeholders = ','.join(['?' for _ in range(len(col_names))])
@@ -111,10 +128,6 @@ def saveTweetToHistory(tweet_response_json, category):
     
     return inserted_id
 
-
-# load all the rows from the table and return a df
-def loadTweetHistory():
-    pass
 
 
 inserted_ids = saveProductsToDb(products)

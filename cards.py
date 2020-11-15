@@ -25,8 +25,8 @@ class TweetCard():
         self.figsize = figsize
         self.y_font_size = 12
         self.filename = f'./generated/{filename}.png'
-        
         self.hashtags = ['#alberta', '#abcannabis', '#canadiancannabis', '#yyccannabis', '#yegcannabis', '#canadianweed ']
+        
 
 
 class GovernmentURLs(TweetCard):
@@ -46,8 +46,8 @@ class GovernmentURLs(TweetCard):
     def getTweetText(self):
         hashtags = ' '.join(self.hashtags)
         text = (
-            'Remember! Stay informed and use cannabis responsibly. \r\n'
-            'https://www.canada.ca/en/health-canada/services/drugs-medication/cannabis.html \r\n'
+            'Remember! Stay informed and use cannabis responsibly. \n'
+            'https://www.canada.ca/en/health-canada/services/drugs-medication/cannabis.html \n'
             f'{hashtags}'
             )
         return text
@@ -196,7 +196,7 @@ class HighValueProducts(TweetCard):
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
             pdf = self.products_df
             filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
-            jar_sizes = filtered_df['Quantity'].tolist()
+            jar_sizes = filtered_df['Quantity'].unique().tolist()
             quantities.append(jar_sizes)
         
         # bring the data together
@@ -297,7 +297,7 @@ class HighThcProducts(TweetCard):
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
             pdf = self.products_df
             filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
-            jar_sizes = filtered_df['Quantity'].tolist()
+            jar_sizes = filtered_df['Quantity'].unique().tolist()
             quantities.append(jar_sizes)
         
         # bring the data together
@@ -400,7 +400,7 @@ class HighCbdProducts(TweetCard):
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
             pdf = self.products_df
             filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
-            jar_sizes = filtered_df['Quantity'].tolist()
+            jar_sizes = filtered_df['Quantity'].unique().tolist()
             quantities.append(jar_sizes)
             
         # bring the data together

@@ -10,7 +10,7 @@ from datetime import datetime
 import cards
 import time
 import twitter_api
-
+import product_database
 
 scraper = WebScraper()
 products, products_df = scraper.getProductDataFromWeb()
@@ -55,7 +55,7 @@ class TaskRunner():
         self.schedule = {
             'daily': [
                 {
-                    'card': cards.HighThcProducts,                    
+                    'card': cards.HighThcProducts,
                     'hour': hour,
                     'rows': rows,
                     'figsize': figsize,
@@ -97,6 +97,11 @@ class TaskRunner():
         # check against the schedule
         tasks = [x for x in self.schedule['daily'] if x['hour'] == now.hour]
         
+        # JL TODO
+        # has the task already run? skip if so.  finish this !  and test method 
+        product_database.hasTaskRunToday
+        
+        
         return tasks
             
             
@@ -120,21 +125,18 @@ def main():
     while(running):
         tasks = runner.getRunnableTasks()
         for t in tasks:
-            # has the task already run? skip if so
-            
             results = runner.runTask(t)
 
             tweet_text = results[2]
 
             # take these results and tweet them !
-            
             twitter_api.postTweet(tweet_text)
             
             # be kind to the api
             time.sleep(5)
             
         
-        time.sleep(0.5)
+        time.sleep(60)
         running = False
 
 
