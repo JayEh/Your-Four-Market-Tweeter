@@ -113,7 +113,12 @@ class TaskRunner():
         data = card.getData()
         card.getImage(data)
         text = card.getTweetText()
-        return (data, task['filename'], text)
+        
+        return  {
+            'data': data,
+            'filename': task['filename'],
+            'text': text
+            }
 
 
 

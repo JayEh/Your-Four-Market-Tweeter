@@ -130,7 +130,9 @@ def saveTweetToHistory(tweet_response_json, category, card_type):
 
 
 
-inserted_ids = saveProductsToDb(products)
+# inserted_ids = saveProductsToDb(products)
+
+
 
 
 

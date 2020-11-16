@@ -52,8 +52,6 @@ class GovernmentURLs(TweetCard):
             )
         return text
     
-    
-    
 
 class TopDollarProducts(TweetCard):
     def getData(self):
@@ -114,7 +112,10 @@ class TopDollarProducts(TweetCard):
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
-        ax.set_title('Alberta Bud Report \nTop Dollar Eighths (3.5g) Average Selling Price \n and what about now')
+        ax.set_title((
+            'Alberta Bud Report \n'
+            'Top Dollar Eighths (3.5g) Average Selling Price \n'
+            f'{formatted_date}'))
         plt.savefig(self.filename, bbox_inches='tight')
         plt.show()
         
@@ -257,7 +258,8 @@ class HighValueProducts(TweetCard):
         ax.set_xticks([])
         ax.set_title((
             'Alberta Bud Report \n'
-            'High Value (and available quantities)'
+            'High Value (and available quantities) \n'
+            f'{formatted_date}'
             ))
         plt.savefig(self.filename, bbox_inches='tight')
         plt.show()
@@ -287,6 +289,7 @@ class HighThcProducts(TweetCard):
         
         # select however many to put in the report (randomly)
         rows = min(rows, len(report_rows))
+        self.actual_rows = rows
         additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
         
         # select the additional rows by index
@@ -339,16 +342,15 @@ class HighThcProducts(TweetCard):
         ax.set_ylabel('Brand', fontsize=self.y_font_size)
         ax.set_yticks(y_pos)
         ax.set_yticklabels(companies, fontsize=self.y_font_size)
-        
-        # how do I set the font to make it easier to read?
-        
+                
         formatted_date = date.today().strftime('%B %d, %Y')
         ax.set_xlabel(f'From AlbertaCannabis.org on {formatted_date}')
         
         ax.set_xticks([])
         ax.set_title((
             'Alberta Bud Report \n'
-            'Above Average THC % (and available quantities)'
+            'Above Average THC % (and available quantities) \n'
+            f'{formatted_date}'
             ))
         plt.savefig(self.filename, bbox_inches='tight')
         plt.show()
@@ -359,8 +361,8 @@ class HighThcProducts(TweetCard):
         # the image! 
         
         tweet_text = (
-            f'Here are {self.rows} of the highest THC strains on the market. '
-            f'Check back daily for a different {self.rows}.'
+            f'Here are {self.actual_rows} of the highest THC strains on the Alberta market. '
+            f'Check back daily!'
             )
         
         return tweet_text
@@ -458,7 +460,8 @@ class HighCbdProducts(TweetCard):
         ax.set_xticks([])
         ax.set_title((
             'Alberta Bud Report \n'
-            'CBD (blue) and CBD/THC (green) (and available quantities)'
+            'CBD (blue) and CBD/THC (green) (and available quantities) \n'
+            f'{formatted_date}'
             ))
         plt.savefig(self.filename, bbox_inches='tight')
         plt.show()
