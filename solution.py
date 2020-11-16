@@ -43,11 +43,10 @@ urls = cards.GovernmentURLs()
 text = urls.getTweetText()
 
 
-
 class TaskRunner():
     def __init__(self):
         
-        hour = 17
+        hour = 14
         
         rows = 25
         figsize=(7.5,10)
@@ -95,16 +94,11 @@ class TaskRunner():
         now = datetime.now() # device timezone
         
         # check against the schedule
-        tasks = [x for x in self.schedule['daily'] if x['hour'] == now.hour]
-        
-        # JL TODO
         # has the task already run? skip if so.  finish this !  and test method 
-        product_database.hasTaskRunToday
-        
+        tasks = [task for task in self.schedule['daily'] if task['hour'] == now.hour and product_database.hasTaskRunToday(task, now)]
         
         return tasks
-            
-            
+
     
     # products=None, products_df=None, rows=None, figsize=None, filename=None
     def runTask(self, task):
