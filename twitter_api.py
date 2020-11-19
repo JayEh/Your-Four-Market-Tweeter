@@ -30,7 +30,7 @@ def getTwitterApi():
 
 
 def postTweet(tweet_text):
-    api = getTwitterApi()    
+    api = getTwitterApi()
     r = api.request('statuses/update', {'status': tweet_text})
     
     # save this tweet response json and the category to the DB! 
@@ -40,17 +40,28 @@ def postTweet(tweet_text):
     print(str(r.json()))
 
 
-def postMedia(file):
-    pass
-
-
-    # file = open(IMAGE_PATH, 'rb')
-    # data = file.read()
-    # r = api.request('media/upload', None, {'media': data})
-    # print('UPLOAD MEDIA SUCCESS' if r.status_code == 200 else 'UPLOAD MEDIA FAILURE: ' + r.text)
+def postMedia(task_result):
+    api = getTwitterApi()
     
     
-    # if r.status_code == 200:
-    # media_id = r.json()['media_id']
-    # r = api.request('statuses/update', {'status': TWEET_TEXT, 'media_ids': media_id})
-    # print('UPDATE STATUS SUCCESS' if r.status_code == 200 else 'UPDATE STATUS FAILURE: ' + r.text)
+    # JL TODO - did not load file, is the path correct? 
+    
+    with open(task_result['filename'], 'rb') as img:
+        data = img.read()
+    
+    r = api.request('media/upload', None, {'media': data})
+    
+    print('UPLOAD MEDIA SUCCESS' if r.status_code == 200 else 'UPLOAD MEDIA FAILURE: ' + r.text)
+    print(str(r.json()))
+    
+    
+    # just call postTweet here!
+    
+    if r.status_code == 200:
+        media_id = r.json()['media_id']
+        r = api.request('statuses/update', {'status': 'test test test', 'media_ids': media_id})
+        print('UPDATE STATUS SUCCESS' if r.status_code == 200 else 'UPDATE STATUS FAILURE: ' + r.text)
+    
+    
+    
+    

@@ -24,7 +24,7 @@ class TweetCard():
         self.rows = rows
         self.figsize = figsize
         self.y_font_size = 12
-        self.filename = f'./generated/{filename}.png'
+        self.filename = f'.\\generated\\{filename}.png'
         self.hashtags = ['#alberta', '#abcannabis', '#canadiancannabis', '#yyccannabis', '#yegcannabis', '#canadianweed ']
         
 
@@ -121,11 +121,8 @@ class TopDollarProducts(TweetCard):
         
         
     def getTweetText(self):
-        hashtags = ' '.join(self.hashtags)
         text = (
-            f'Here are {self.actual_rows} of the highest THC strains on the market. '
-            'Check back daily for more suggestions! \r\n'
-            f'{hashtags}'
+            f'Here are {self.actual_rows} brands charging top dollar for their products.'
             )
         return text
 
@@ -170,7 +167,6 @@ class HighValueCompanies(TweetCard):
 
 
 
-
 class HighValueProducts(TweetCard):
     def getData(self):
         rows = self.rows
@@ -185,6 +181,9 @@ class HighValueProducts(TweetCard):
         row_idxs = np.arange(len(report_rows)) 
         reversed_rows = report_rows['dollar_per_gram'] * -1 
         row_probs = softmax(reversed_rows.tolist())
+        
+        rows = min(rows, len(report_rows))
+        self.actual_rows = rows
         
         # select however many to put in the report (randomly)
         additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
@@ -265,7 +264,12 @@ class HighValueProducts(TweetCard):
         plt.show()
 
     def getTweetText(self):
-        pass
+        text = (
+            f'Every day we tweet out {self.actual_rows} products with above average value. '
+            'We only show the best, but change it up daily.'
+            )
+        
+        return text
 
 
 
@@ -287,15 +291,16 @@ class HighThcProducts(TweetCard):
         row_idxs = np.arange(len(report_rows))
         row_probs = softmax(report_rows['thc_max'].tolist())
         
-        # select however many to put in the report (randomly)
         rows = min(rows, len(report_rows))
         self.actual_rows = rows
+        
+        # select however many to put in the report (randomly)
         additional_rows_idxs = np.random.choice(row_idxs, p=row_probs, size=rows, replace=False).tolist()
         
         # select the additional rows by index
         report_rows = report_rows.iloc[additional_rows_idxs]
         
-        # what quantities can you buy this in?      
+        # what quantities can you buy this in?
         quantities = []
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
             pdf = self.products_df
@@ -357,12 +362,8 @@ class HighThcProducts(TweetCard):
         
         
     def getTweetText(self):
-        # can use the df data here to help make the text that goes with
-        # the image! 
-        
         tweet_text = (
-            f'Here are {self.actual_rows} of the highest THC strains on the Alberta market. '
-            f'Check back daily!'
+            f'Here are {self.actual_rows} of the most potent products on the market. '
             )
         
         return tweet_text
@@ -370,7 +371,6 @@ class HighThcProducts(TweetCard):
 
 
 class HighCbdProducts(TweetCard):
-    
     def getData(self):
         rows = self.rows
         
@@ -467,9 +467,9 @@ class HighCbdProducts(TweetCard):
         plt.show()
 
     def getTweetText(self):
-        tweet_text = (
-            f'The Alberta market currently has a low selection of CBD products. '
-            f'Check out these {self.pure_cbd_count} CBD products and another {self.blend_count} with THC/CBD.'
+        tweet_text = (            
+            f'Check out these {self.pure_cbd_count} CBD products and another {self.blend_count} with a THC/CBD blend. '
+            'The Alberta market has relatively low selection of CBD products.'
             )
         
         return tweet_text
