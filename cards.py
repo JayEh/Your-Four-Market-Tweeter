@@ -46,7 +46,7 @@ class GovernmentURLs(TweetCard):
     def getTweetText(self):
         hashtags = ' '.join(self.hashtags)
         text = (
-            'Remember! Stay informed and use cannabis responsibly. \n'
+            'This is the Alberta Bud Report. Remember! Stay informed and use cannabis responsibly. \n'
             'https://www.canada.ca/en/health-canada/services/drugs-medication/cannabis.html \n'
             f'{hashtags}'
             )
@@ -122,7 +122,7 @@ class TopDollarProducts(TweetCard):
         
     def getTweetText(self):
         text = (
-            f'Here are {self.actual_rows} brands charging top dollar for their products.'
+            f'The Alberta Bud Report. Here are {self.actual_rows} brands charging top dollar for their products.'
             )
         return text
 
@@ -265,7 +265,7 @@ class HighValueProducts(TweetCard):
 
     def getTweetText(self):
         text = (
-            f'Every day we tweet out {self.actual_rows} products with above average value. '
+            f'The Alberta Bud Report. Every day we tweet out {self.actual_rows} products with above average value. '
             'We only show the best, but change it up daily.'
             )
         
@@ -363,7 +363,7 @@ class HighThcProducts(TweetCard):
         
     def getTweetText(self):
         tweet_text = (
-            f'Here are {self.actual_rows} of the most potent products on the market. '
+            f'The Alberta Bud Report. Here are {self.actual_rows} of the most potent products on the market. '
             )
         
         return tweet_text
@@ -468,7 +468,7 @@ class HighCbdProducts(TweetCard):
 
     def getTweetText(self):
         tweet_text = (            
-            f'Check out these {self.pure_cbd_count} CBD products and another {self.blend_count} with a THC/CBD blend. '
+            f'The Alberta Bud Report. Check out these {self.pure_cbd_count} CBD products and another {self.blend_count} with a THC/CBD blend. '
             'The Alberta market has relatively low selection of CBD products.'
             )
         

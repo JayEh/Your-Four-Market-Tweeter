@@ -46,9 +46,9 @@ products, products_df = scraper.getProductDataFromWeb()
 class TaskRunner():
     def __init__(self):
         
-        hour = 12
+        hour = 19
         rows = 25
-        figsize=(7.5,10)
+        figsize=(10,10)
         
         
         self.schedule = {
@@ -126,12 +126,11 @@ def main():
             
             # take these results and tweet them !
             # still testing, pretend for now.. lol
-            #response_json = twitter_api.postMedia(task_result)
+            response_json = twitter_api.postMedia(t, task_result)
             
-            # update the database with the json from the tweet
-            product_database.saveTweetToHistory(response_json, 'tweet', t['filename'])
+            print(response_json)
             
-            # be kind to the api
+            # be kind to the api, sleep a bit
             time.sleep(1)
         running = False
         # time.sleep(60)
