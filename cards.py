@@ -12,8 +12,8 @@ import locale
 import pandas as pd
 from datetime import date
 
-locale.setlocale(locale.LC_ALL, 'en_CA.UTF-8')
-plt.style.use('dark_background')
+locale.setlocale(locale.LC_ALL, 'en_CA.UTF-8') # used for formatting currency
+plt.style.use('dark_background') # used for the visual style of the plots
 
 
 # inherit this class
@@ -92,7 +92,7 @@ class TopDollarProducts(TweetCard):
         fig, ax = plt.subplots(figsize=self.figsize)
         
         companies = [d[0] for d in data]
-        top_prices = [d[1] for d in data]        
+        top_prices = [d[1] for d in data]
         y_pos = np.arange(len(companies))
         
         for i, price in enumerate(top_prices):
@@ -257,7 +257,7 @@ class HighValueProducts(TweetCard):
         ax.set_xticks([])
         ax.set_title((
             'Alberta Bud Report \n'
-            'High Value (and available quantities) \n'
+            'Lowest $ / gram (and available quantities) \n'
             f'{formatted_date}'
             ))
         plt.savefig(self.filename, bbox_inches='tight')
@@ -265,8 +265,8 @@ class HighValueProducts(TweetCard):
 
     def getTweetText(self):
         text = (
-            f'The Alberta Bud Report. Every day we tweet out {self.actual_rows} products with above average value. '
-            'We only show the best, but change it up daily.'
+            f'The Alberta Bud Report. These {self.actual_rows} products are a selection of the lowest dollar per gram on the market today. '
+            'Check back daily for an updated report!'
             )
         
         return text
@@ -302,20 +302,24 @@ class HighThcProducts(TweetCard):
         
         # what quantities can you buy this in?
         quantities = []
+        prices = []
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
             pdf = self.products_df
             filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
             jar_sizes = filtered_df['Quantity'].unique().tolist()
+            price_range = filtered_df['adjusted_price_float'].unique().tolist()
             quantities.append(jar_sizes)
+            prices.append(price_range)
+            
         
         # bring the data together
         top_brands = list(zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()))
         top_thc = list((report_rows['thc_max']).values)
-        data =  list(zip(top_brands, top_thc, quantities))
+        data =  list(zip(top_brands, top_thc, quantities, prices))
         
         # add the market average
         data = sorted(data, key=lambda x: x[1])
-        data.insert(len(data), (('Market Average',''), round(df_mean, 1), []))
+        data.insert(len(data), (('Market Average',''), round(df_mean, 1), [], []))
         return data
     
     
@@ -325,20 +329,31 @@ class HighThcProducts(TweetCard):
         companies_and_products = [d[0] for d in data]
         avg_thc = [d[1] for d in data]
         quantities = [d[2] for d in data]
+        prices = [d[3] for d in data]
         companies = [c[0] for c in companies_and_products]
         products = [c[1] for c in companies_and_products]
         
         y_pos = np.arange(len(companies_and_products))
         
         for i,product_name in enumerate(products):
-            bar_text = product_name
-            if len(quantities[i]) > 0:
-                q = [str(q)+'g' for q in quantities[i]]
-                q = ', '.join(q)
-                q = f'   ({q})'
-                bar_text += q
+            # add text for quantities and prices
+            text_items = [] # join the elements in this list once they are all collected
+            for qi, pi in list(zip(quantities[i], prices[i])):
+                q = f'{qi}g'
+                #p = locale.currency(pi) # this is troublesome since $ is a special character for plt
+                p = f'\${pi}'
+                
+                t = f'{q} / {p}'
+                text_items.append(t)
             
-            ax.text(1.0, i, bar_text, verticalalignment='center', color='white')
+            if len(text_items) > 0:
+                product_text = ',  '.join(text_items)
+                bar_text = f'{product_name}   ({product_text})'
+            else:
+                bar_text = f'{product_name}'
+            
+            # set the text for bar i
+            plt.text(1.0, i, bar_text, verticalalignment='center', color='white')
         
         bar_colors = [(0.35+(i/(len(data) *3)),0,0) for i in range(len(data))]
         bar_colors[len(bar_colors)-1] = (30/256,30/256,30/256)

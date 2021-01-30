@@ -12,8 +12,8 @@ import time
 import twitter_api
 import product_database
 
-scraper = WebScraper()
-products, products_df = scraper.getProductDataFromWeb()
+from constants import DEBUG
+
 
 # highThcProductsCard = cards.HighThcProducts(products, products_df, rows=25, figsize=(7.5,10), filename='high_thc_products')
 # data = highThcProductsCard.getData()
@@ -46,7 +46,7 @@ products, products_df = scraper.getProductDataFromWeb()
 class TaskRunner():
     def __init__(self):
         
-        hour = 19
+        hour = 14
         rows = 25
         figsize=(10,10)
         
@@ -99,9 +99,8 @@ class TaskRunner():
         
         return tasks
 
-    
-    # products=None, products_df=None, rows=None, figsize=None, filename=None
-    def runTask(self, task):
+
+    def runTask(self, task, products, products_df):
         card = task['card'](products, products_df, task['rows'], task['figsize'], task['filename'])
         
         data = card.getData()
@@ -115,23 +114,26 @@ class TaskRunner():
             }
 
 
+
 def main():
+    scraper = WebScraper()
+    products, products_df = scraper.getProductDataFromWeb()
+    
     runner = TaskRunner()
     running = True
     
     while(running):
         tasks = runner.getRunnableTasks()
         for t in tasks:
-            task_result = runner.runTask(t)
+            task_result = runner.runTask(t, products, products_df)
             
-            # take these results and tweet them !
-            # still testing, pretend for now.. lol
-            response_json = twitter_api.postMedia(t, task_result)
+            if DEBUG == False:
+                response_json = twitter_api.postMedia(t, task_result)
+                print(response_json)
+                
+                # be kind to the api, sleep a bit
+                time.sleep(1)
             
-            print(response_json)
-            
-            # be kind to the api, sleep a bit
-            time.sleep(1)
         running = False
         # time.sleep(60)
 
