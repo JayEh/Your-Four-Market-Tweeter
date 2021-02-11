@@ -1,6 +1,3 @@
-
-products_df_pickle.pkl
-products_pickle.pkl
 app_db_project_file.sqbpro
 app_db.db
 __pycache__/weed_tweeter.cpython-37.pyc
@@ -19,3 +16,4 @@ generated/HighCbdProducts.png
 generated/HighThcProducts.png
 generated/HighValueProducts.png
 generated/TopDollarProducts.png
+*.pkl
