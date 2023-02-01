@@ -12,7 +12,7 @@ import time
 import twitter_api
 import product_database
 
-from constants import DEBUG
+from constants import POST_TWEET
 
 
 # highThcProductsCard = cards.HighThcProducts(products, products_df, rows=25, figsize=(7.5,10), filename='high_thc_products')
@@ -46,10 +46,9 @@ from constants import DEBUG
 class TaskRunner():
     def __init__(self):
         
-        hour = 14
+        hour = 13
         rows = 25
         figsize=(10,10)
-        
         
         self.schedule = {
             'daily': [
@@ -127,7 +126,7 @@ def main():
         for t in tasks:
             task_result = runner.runTask(t, products, products_df)
             
-            if DEBUG == False:
+            if POST_TWEET == True:
                 response_json = twitter_api.postMedia(t, task_result)
                 print(response_json)
                 
@@ -139,4 +138,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

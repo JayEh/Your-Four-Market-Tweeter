@@ -35,7 +35,6 @@ def loadTweetHistory():
 
 # hacky because it connects and drops at each sql statement!
 def hacky_run_sql(c, sqlConnection, sql_string, params=None):
-    
     if (params is None):
         c.execute(sql_string)
     else:
@@ -50,14 +49,12 @@ def hacky_run_sql(c, sqlConnection, sql_string, params=None):
 
 # hacky because it connects and drops at each sql statement!
 def hacky_select_sql(c, sqlConnection, sql_string, params=None):
-    
     if (params is None):
         c.execute(sql_string)
     else:
         c.execute(sql_string, params)
 
     results = c.fetchall()
-        
     return results
 
 

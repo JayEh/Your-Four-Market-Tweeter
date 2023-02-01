@@ -127,7 +127,6 @@ class TopDollarProducts(TweetCard):
         return text
 
 
-
 class HighValueCompanies(TweetCard):
     def getData(self):
         grouped_by_brand = self.products_df.groupby(['Brand']).mean()
@@ -166,7 +165,6 @@ class HighValueCompanies(TweetCard):
         # return it?
 
 
-
 class HighValueProducts(TweetCard):
     def getData(self):
         rows = self.rows
@@ -193,20 +191,23 @@ class HighValueProducts(TweetCard):
         
         # what quantities can you buy this in?      
         quantities = []
+        prices = []
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
             pdf = self.products_df
             filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
             jar_sizes = filtered_df['Quantity'].unique().tolist()
+            price_range = filtered_df['adjusted_price_float'].unique().tolist()
             quantities.append(jar_sizes)
+            prices.append(price_range)
         
         # bring the data together
         top_brands = list(zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()))
         top_dpg = list((report_rows['dollar_per_gram']).values)
-        data =  list(zip(top_brands, top_dpg, quantities))
+        data =  list(zip(top_brands, top_dpg, quantities, prices))
         
         # add the market average
         data = sorted(data, key=lambda x: x[1], reverse=True)
-        data.insert(len(data), (('Market Average',''), round(df_mean, 1), []))
+        data.insert(len(data), (('Market Average',''), round(df_mean, 1), [], []))
         return data
         
     
@@ -216,21 +217,32 @@ class HighValueProducts(TweetCard):
         companies_and_products = [d[0] for d in data]
         avg_dpg = [d[1] for d in data]
         quantities = [d[2] for d in data]
+        prices = [d[3] for d in data]
         companies = [c[0] for c in companies_and_products]
         products = [c[1] for c in companies_and_products]
         
         y_pos = np.arange(len(companies_and_products))
         
         for i,product_name in enumerate(products):
-            
+            # add text for quantities and prices
+            text_items = [] # join the elements in this list once they are all collected
             bar_text = product_name
-            
-            if len(quantities[i]) > 0:
-                q = [str(q)+'g' for q in quantities[i]]
-                q = ', '.join(q)
-                q = f'   ({q})'
-                bar_text += q
-            
+
+            for qi, pi in list(zip(quantities[i], prices[i])):
+                q = f'{qi}g'
+
+                #p = locale.currency(pi) # this is troublesome since $ is a special character for plt
+                p = f'\${pi}'
+
+                t = f'{q} / {p}'
+                text_items.append(t)
+
+                if len(text_items) > 0:
+                    product_text = ',  '.join(text_items)
+                    bar_text = f'{product_name}   ({product_text})'
+                else:
+                    bar_text = f'{product_name}'
+
             
             if i == len(products)-1: 
                 dollars_per_gram = locale.currency(avg_dpg[i]) + ' / gram'
@@ -270,7 +282,6 @@ class HighValueProducts(TweetCard):
             )
         
         return text
-
 
 
 class HighThcProducts(TweetCard):
@@ -340,6 +351,7 @@ class HighThcProducts(TweetCard):
             text_items = [] # join the elements in this list once they are all collected
             for qi, pi in list(zip(quantities[i], prices[i])):
                 q = f'{qi}g'
+                
                 #p = locale.currency(pi) # this is troublesome since $ is a special character for plt
                 p = f'\${pi}'
                 
@@ -384,7 +396,6 @@ class HighThcProducts(TweetCard):
         return tweet_text
 
 
-
 class HighCbdProducts(TweetCard):
     def getData(self):
         rows = self.rows
@@ -414,18 +425,21 @@ class HighCbdProducts(TweetCard):
         
         # what quantities can you buy this in?
         quantities = []
+        prices = []
         for brand, product in zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()):
             pdf = self.products_df
             filtered_df = pdf[(pdf['Brand'] == brand) & (pdf['DisplayName'] == product)]
             jar_sizes = filtered_df['Quantity'].unique().tolist()
+            price_range = filtered_df['adjusted_price_float'].unique().tolist()
             quantities.append(jar_sizes)
+            prices.append(price_range)
             
         # bring the data together
         top_brands = list(zip(report_rows['Brand'].tolist(), report_rows['DisplayName'].tolist()))
         top_cbd = report_rows['cbd_avg'].tolist()
         pure_cbd = report_rows['pure_cbd'].tolist()
         
-        data = list(zip(top_brands, top_cbd, quantities, pure_cbd))
+        data = list(zip(top_brands, top_cbd, quantities, pure_cbd, prices))
         data = sorted(data, key=lambda x: x[1], reverse=False)
         return data
     
@@ -436,19 +450,36 @@ class HighCbdProducts(TweetCard):
         avg_cbd = [d[1] for d in data]
         quantities = [d[2] for d in data]
         pure_cbd = [d[3] for d in data]
+        prices = [d[4] for d in data]
         
         companies = [c[0] for c in companies_and_products]
         products = [c[1] for c in companies_and_products]
         
         y_pos = np.arange(len(companies_and_products))
         
-        for i,product_name in enumerate(products):
-            bar_text = product_name
-            if len(quantities[i]) > 0:
-                q = [str(q)+'g' for q in quantities[i]]
-                q = ', '.join(q)
-                q = f'   ({q})'
-                bar_text += q
+        for i, product_name in enumerate(products):            
+            text_items = []
+            for qi, pi in list(zip(quantities[i], prices[i])):
+                q = f'{qi}g'
+                
+                #p = locale.currency(pi) # this is troublesome since $ is a special character for plt
+                p = f'\${pi}'
+                
+                t = f'{q} / {p}'
+                text_items.append(t)
+
+            if len(text_items) > 0:
+                product_text = ',  '.join(text_items)
+                bar_text = f'{product_name}   ({product_text})'
+            else:
+                bar_text = f'{product_name}'
+            
+            # bar_text = product_name
+            # if len(quantities[i]) > 0:
+            #     q = [str(q)+'g' for q in quantities[i]]
+            #     q = ', '.join(q)
+            #     q = f'   ({q})'
+            #    bar_text += q
             
             ax.text(0.5, i, bar_text, verticalalignment='center', color='white')
         

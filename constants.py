@@ -5,4 +5,6 @@ Created on Sat Jan 23 12:40:26 2021
 @author: jarre
 """
 
-DEBUG = True
+POST_TWEET = True
+COLLECT_DATA = True
+

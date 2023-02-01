@@ -11,7 +11,7 @@ import json
 import pandas as pd
 import os
 
-from constants import DEBUG
+from constants import COLLECT_DATA
 from product_database import saveProductsToDb
 
 # inserted_ids = saveProductsToDb(products)
@@ -34,7 +34,7 @@ class WebScraper():
         products_df = None
         
         # load from the disk (not live data) when debugging
-        if DEBUG == True:
+        if COLLECT_DATA == False:
             if os.path.exists(self.products_file) == True:
                 with open(self.products_file) as file:
                     products_json = file.read()
@@ -58,13 +58,13 @@ class WebScraper():
     def getProductDataFromWeb(self):
         
         # when not debugging - get live data!
-        if DEBUG == False and (type(self.products) == type(None) or type(self.products_df) == type(None)):
-            abc = subprocess.run('curl "https://www.albertacannabis.org/api/cxa/CatalogExtended/GetProductList" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0" -H "Accept: */*" -H "Accept-Language: en-CA,en-US;q=0.7,en;q=0.3" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" -H "__RequestVerificationToken: OUp10VUDi8VBEpbeVk7VD7HT1JWlmWnNbwp_FQcxTqr4aR28Mwkk2mNnjMk1Og-GhmVOgnX3wdyYMCoRo5_auLhukJo1" -H "X-Requested-With: XMLHttpRequest" -H "Origin: https://www.albertacannabis.org" -H "DNT: 1" -H "Connection: keep-alive" -H "Referer: https://www.albertacannabis.org/shop/Cannabis=aglc_cannabis-cannabis?f=format"%"3DDried"%"20Flower|Milled"%"20Flower&ps=400" -H "Cookie: f5_cspm=1234; ASP.NET_SessionId=h20zueiku1f1fwxnuxu1jgnn; SC_ANALYTICS_GLOBAL_COOKIE=7856d2e38a9d4c38b9b918028f090ab1|True; __RequestVerificationToken=FZhJ866Bt00z0vp_qcULMngZ8JPxJBCx5XUBP39NR2Ho3Isj9iRgtZHF78DUVWTTaQxSQrtPsD4Ng4ax5R2gMXsb6eg1; sxa_site=Cannabis; f5avr1519412710aaaaaaaaaaaaaaaa=BGPDFPBELJOLKMEEKEGFHKKEOKNHMBBFCLMEINGDELJNEDDMEDHGBIHHEMNKJGDDLCNPCPDGOCMCKFBMMLIDFCIJOHMAICDNJNMCKDGPKCJFKONJAFEHFKOJMKDCAJBA" --data-raw "pg=0&f=format"%"253DDried"%"2520Flower"%"7CMilled"%"2520Flower&ps=400&sd=Asc&cci="%"7BDAAC337F-EC42-9DD5-33BC-851875C99BEB"%"7D&ci="%"7BC8173B3F-26C8-41AB-B042-9CAAD37B543B"%"7D&__RequestVerificationToken=OUp10VUDi8VBEpbeVk7VD7HT1JWlmWnNbwp_FQcxTqr4aR28Mwkk2mNnjMk1Og-GhmVOgnX3wdyYMCoRo5_auLhukJo1"', 
+        if COLLECT_DATA == True or type(self.products) == type(None) or type(self.products_df) == type(None):
+            abc = subprocess.run('curl "https://www.albertacannabis.org/api/cxa/CatalogExtended/GetProductList" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0" -H "Accept: */*" -H "Accept-Language: en-CA,en-US;q=0.7,en;q=0.3" -H "Content-Type: application/x-www-form-urlencoded; charset=UTF-8" -H "__RequestVerificationToken: OUp10VUDi8VBEpbeVk7VD7HT1JWlmWnNbwp_FQcxTqr4aR28Mwkk2mNnjMk1Og-GhmVOgnX3wdyYMCoRo5_auLhukJo1" -H "X-Requested-With: XMLHttpRequest" -H "Origin: https://www.albertacannabis.org" -H "DNT: 1" -H "Connection: keep-alive" -H "Referer: https://www.albertacannabis.org/shop/Cannabis=aglc_cannabis-cannabis?f=format"%"3DDried"%"20Flower|Milled"%"20Flower&ps=500" -H "Cookie: f5_cspm=1234; ASP.NET_SessionId=h20zueiku1f1fwxnuxu1jgnn; SC_ANALYTICS_GLOBAL_COOKIE=7856d2e38a9d4c38b9b918028f090ab1|True; __RequestVerificationToken=FZhJ866Bt00z0vp_qcULMngZ8JPxJBCx5XUBP39NR2Ho3Isj9iRgtZHF78DUVWTTaQxSQrtPsD4Ng4ax5R2gMXsb6eg1; sxa_site=Cannabis; f5avr1519412710aaaaaaaaaaaaaaaa=BGPDFPBELJOLKMEEKEGFHKKEOKNHMBBFCLMEINGDELJNEDDMEDHGBIHHEMNKJGDDLCNPCPDGOCMCKFBMMLIDFCIJOHMAICDNJNMCKDGPKCJFKONJAFEHFKOJMKDCAJBA" --data-raw "pg=0&f=format"%"253DDried"%"2520Flower"%"7CMilled"%"2520Flower&ps=500&sd=Asc&cci="%"7BDAAC337F-EC42-9DD5-33BC-851875C99BEB"%"7D&ci="%"7BC8173B3F-26C8-41AB-B042-9CAAD37B543B"%"7D&__RequestVerificationToken=OUp10VUDi8VBEpbeVk7VD7HT1JWlmWnNbwp_FQcxTqr4aR28Mwkk2mNnjMk1Og-GhmVOgnX3wdyYMCoRo5_auLhukJo1"', 
                                  shell=True, check=True, capture_output=True, encoding='utf-8')
             
             canna_json = json.loads(abc.stdout)
             self.products, self.products_df = self.update_products(canna_json['Variants'])
-            self.serializeProductData()    
+            self.serializeProductData()
             
             saveProductsToDb(self.products)
         
@@ -119,6 +119,7 @@ class WebScraper():
             else:
                 data['min'] = float(split_text[0])
                 data['max'] = float(split_text[0])
+        
         elif 'mg/g' in text:
             text = text.replace('mg/g', '')
             text = text.strip()
@@ -130,6 +131,13 @@ class WebScraper():
             else:
                 data['min'] = float(split_text[0]) / 10
                 data['max'] = float(split_text[0]) / 10
+                
+            # sometimes the products are listed wrong, fix that
+            if data['min'] / 100 > 1:
+                data['min'] = data['min'] / 100
+            if data['max'] / 100 > 1:
+                data['max'] = data['max'] / 100
+            
         else:
             # must just be a single digit?
             text = text.strip()
